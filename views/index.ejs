@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login - OMR Result Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #0a1e46;">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                OMR Result Viewer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/answer-key">
+                            <i class="fas fa-key me-1"></i>Answer Key
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid my-4">
+        <div class="row g-4 justify-content-center">
+            <!-- Left Side - Student Login Form (60%) -->
+            <div class="col-12 col-lg-7 col-xl-6">
+                <div class="card">
+                    <div class="card-header text-white text-center" style="background-color: #34495e;">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user-graduate me-2"></i>
+                            Student Login Portal
+                        </h4>
+                        <p class="mb-0 mt-2">Access your exam results</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Display Errors -->
+                        <% if (errors && errors.length> 0) { %>
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    <% errors.forEach(error=> { %>
+                                        <li>
+                                            <%= error.msg %>
+                                        </li>
+                                        <% }); %>
+                                </ul>
+                            </div>
+                            <% } %>
+
+                                <form action="/view" method="POST" id="studentAuthForm" style="position: relative;">
+                                    <!-- Loading Overlay -->
+                                    <div id="loadingOverlay" class="d-none"
+                                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 1000; border-radius: 10px;">
+                                        <div class="d-flex justify-content-center align-items-center h-100">
+                                            <div class="text-center">
+                                                <div class="spinner-border text-primary mb-3" role="status"
+                                                    style="width: 3rem; height: 3rem;">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <div class="h5 text-primary">Verifying your details...</div>
+                                                <div class="text-muted">Please wait while we authenticate you</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Roll Number -->
+                                    <div class="mb-4">
+                                        <label for="rollNo" class="form-label">
+                                            <i class="fas fa-id-card me-2"></i>
+                                            Roll Number / Enrollment Number
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="rollNo"
+                                            name="rollNo" placeholder="Enter your roll number" required>
+                                    </div>
+
+                                    <!-- Date of Birth -->
+                                    <div class="mb-4">
+                                        <label for="dob" class="form-label">
+                                            <i class="fas fa-calendar me-2"></i>
+                                            Date of Birth
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="dob" name="dob"
+                                            placeholder="DD/MM/YYYY" maxlength="10">
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Enter your date of birth in DD/MM/YYYY format
+                                        </div>
+                                    </div>
+
+                                    <!-- OR Divider -->
+                                    <div class="text-center mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <hr class="flex-grow-1">
+                                            <span class="px-4 text-muted bg-white">OR</span>
+                                            <hr class="flex-grow-1">
+                                        </div>
+                                    </div>
+
+                                    <!-- Mobile Number -->
+                                    <div class="mb-4">
+                                        <label for="mobile" class="form-label">
+                                            <i class="fas fa-phone me-2"></i>
+                                            Mobile Number
+                                        </label>
+                                        <input type="tel" class="form-control form-control-lg" id="mobile" name="mobile"
+                                            placeholder="10 digit mobile number" maxlength="10">
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Enter your 10 digit mobile number
+                                        </div>
+                                    </div>
+
+
+
+                                    <!-- Submit Button -->
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-lg py-3 text-white"
+                                            style="background-color: #34495e;">
+                                            <i class="fas fa-search me-2"></i>
+                                            View My Results
+                                        </button>
+                                    </div>
+                                </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Side - Quick Info Panel (40%) -->
+            <div class="col-12 col-lg-5 col-xl-4">
+                <!-- Instructions Card -->
+                <div class="card mb-4">
+                    <div class="card-header text-white" style="background-color: #34495e;">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Instructions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Enter your roll number or enrollment number exactly as provided
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Fill in either Date of Birth OR Mobile Number for authentication
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Date of Birth should be in DD/MM/YYYY format
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Mobile number should be exactly 10 digits without spaces
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                If you provide both, Date of Birth will be used for authentication
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Contact admin if you face any issues accessing your results
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Quick Help Card -->
+                <div class="card">
+                    <div class="card-header text-white" style="background-color: #34495e;">
+                        <h6 class="mb-0">
+                            <i class="fas fa-question-circle me-2"></i>
+                            Quick Help
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="accordion accordion-flush" id="helpAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#help1">
+                                        How to login?
+                                    </button>
+                                </h2>
+                                <div id="help1" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                    <div class="accordion-body">
+                                        <small>Enter your roll number and either date of birth (DD/MM/YYYY) or mobile
+                                            number (10 digits).</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#help2">
+                                        Can't find results?
+                                    </button>
+                                </h2>
+                                <div id="help2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                    <div class="accordion-body">
+                                        <small>Results may not be published yet. Check back later or contact admin for
+                                            assistance.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#help3">
+                                        Need support?
+                                    </button>
+                                </h2>
+                                <div id="help3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                    <div class="accordion-body">
+                                        <small>Contact the admin through the admin panel or reach out to your
+                                            institution for technical support.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0 text-muted">
+                &copy; <%= new Date().getFullYear() %> OMR Result Viewer. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Hide loading overlay on page load (in case of redirect back)
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('d-none');
+            }
+
+            // Re-enable submit button
+            const submitBtn = document.querySelector('#studentAuthForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+            }
+
+            const dobInput = document.getElementById('dob');
+            const mobileInput = document.getElementById('mobile');
+
+            // Format date input as DD/MM/YYYY with visual feedback
+            dobInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2);
+                }
+                if (value.length >= 5) {
+                    value = value.substring(0, 5) + '/' + value.substring(5, 9);
+                }
+
+                e.target.value = value;
+
+                // Visual feedback
+                if (value.length === 10) {
+                    e.target.classList.add('is-valid');
+                    e.target.classList.remove('is-invalid');
+                } else if (value.length > 0) {
+                    e.target.classList.add('is-invalid');
+                    e.target.classList.remove('is-valid');
+                } else {
+                    e.target.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+
+            // Format mobile input (only digits) with visual feedback
+            mobileInput.addEventListener('input', function (e) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+
+                // Visual feedback
+                if (e.target.value.length === 10) {
+                    e.target.classList.add('is-valid');
+                    e.target.classList.remove('is-invalid');
+                } else if (e.target.value.length > 0) {
+                    e.target.classList.add('is-invalid');
+                    e.target.classList.remove('is-valid');
+                } else {
+                    e.target.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+
+            // Clear validation when switching between fields
+            dobInput.addEventListener('focus', function () {
+                mobileInput.classList.remove('is-valid', 'is-invalid');
+                // Clear any client-side error alerts
+                const clientError = document.querySelector('.alert-danger.client-error');
+                if (clientError) clientError.remove();
+            });
+
+            mobileInput.addEventListener('focus', function () {
+                dobInput.classList.remove('is-valid', 'is-invalid');
+                // Clear any client-side error alerts
+                const clientError = document.querySelector('.alert-danger.client-error');
+                if (clientError) clientError.remove();
+            });
+
+            // Form validation
+            document.getElementById('studentAuthForm').addEventListener('submit', function (e) {
+                const rollNo = document.getElementById('rollNo').value.trim();
+                const dob = dobInput.value.trim();
+                const mobile = mobileInput.value.trim();
+                const submitBtn = this.querySelector('button[type="submit"]');
+
+                // Clear any previous error states
+                document.querySelectorAll('.form-control').forEach(input => {
+                    input.classList.remove('is-invalid');
+                });
+
+                let hasError = false;
+
+                if (!rollNo) {
+                    document.getElementById('rollNo').classList.add('is-invalid');
+                    showError('Please enter your roll number');
+                    hasError = true;
+                }
+
+                // Check if at least one authentication method is provided
+                if (!dob && !mobile) {
+                    dobInput.classList.add('is-invalid');
+                    mobileInput.classList.add('is-invalid');
+                    showError('Please enter either your date of birth or mobile number');
+                    hasError = true;
+                }
+
+                // Validate date of birth if provided
+                if (dob) {
+                    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dob)) {
+                        dobInput.classList.add('is-invalid');
+                        showError('Date of birth must be in DD/MM/YYYY format');
+                        hasError = true;
+                    } else {
+                        const parts = dob.split('/');
+                        const day = parseInt(parts[0], 10);
+                        const month = parseInt(parts[1], 10);
+                        const year = parseInt(parts[2], 10);
+
+                        if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > new Date().getFullYear()) {
+                            dobInput.classList.add('is-invalid');
+                            showError('Please enter a valid date of birth');
+                            hasError = true;
+                        }
+                    }
+                }
+
+                // Validate mobile number if provided
+                if (mobile && !/^\d{10}$/.test(mobile)) {
+                    mobileInput.classList.add('is-invalid');
+                    showError('Mobile number must be exactly 10 digits');
+                    hasError = true;
+                }
+
+                if (hasError) {
+                    e.preventDefault();
+                    // Ensure loading overlay is hidden on validation errors
+                    isSubmitting = false;
+                    const loadingOverlay = document.getElementById('loadingOverlay');
+                    loadingOverlay.classList.add('d-none');
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // If both are provided, show warning
+                if (dob && mobile) {
+                    if (!confirm('You have entered both date of birth and mobile number. We will use date of birth for authentication. Continue?')) {
+                        e.preventDefault();
+                        return;
+                    }
+                }
+
+                // Show loading overlay
+                isSubmitting = true;
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                loadingOverlay.classList.remove('d-none');
+                submitBtn.disabled = true;
+
+                // Fallback to hide loading state
+                setTimeout(() => {
+                    isSubmitting = false;
+                    loadingOverlay.classList.add('d-none');
+                    submitBtn.disabled = false;
+                }, 15000);
+            });
+
+            // Helper function to show errors
+            function showError(message) {
+                // Remove existing error alerts
+                const existingAlert = document.querySelector('.alert-danger.client-error');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+
+                // Create new error alert
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger client-error';
+                alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
+
+                // Insert before the form
+                const form = document.getElementById('studentAuthForm');
+                form.parentNode.insertBefore(alertDiv, form);
+
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+
+            // Handle page unload to reset loading state
+            let isSubmitting = false;
+            window.addEventListener('beforeunload', function () {
+                if (isSubmitting) {
+                    const loadingOverlay = document.getElementById('loadingOverlay');
+                    const submitBtn = document.querySelector('#studentAuthForm button[type="submit"]');
+                    if (loadingOverlay) loadingOverlay.classList.add('d-none');
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

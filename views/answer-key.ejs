@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Answer Key - OMR Result Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #0a1e46;">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                OMR Result Viewer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/answer-key">
+                            <i class="fas fa-key me-1"></i>Answer Key
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header text-white text-center" style="background-color: #34495e;">
+                        <h4 class="mb-0">
+                            <i class="fas fa-key me-2"></i>
+                            Answer Key
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <% if (typeof answerKeys !== 'undefined' && answerKeys && answerKeys.length > 0) { %>
+                            <!-- Multiple Answer Keys Display -->
+                            <div class="mb-4">
+                                <h6 class="text-center mb-4">Published Answer Keys</h6>
+                                
+                                <!-- Quick Access Cards -->
+                                <div class="row mb-4">
+                                    <% answerKeys.forEach(ak => { %>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card h-100" style="border-color: #34495e;">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-title" style="color: #34495e;">
+                                                        <i class="fas fa-key me-2"></i>
+                                                        <%= ak.postType %>
+                                                    </h6>
+                                                    <p class="card-text text-muted small">
+                                                        Published: <%= new Date(ak.uploadedAt).toLocaleDateString() %>
+                                                    </p>
+                                                    <div class="d-grid gap-2">
+                                                        <a href="<%= ak.fileUrl %>" target="_blank" class="btn btn-sm text-white" style="background-color: #34495e;">
+                                                            <i class="fas fa-eye me-1"></i>
+                                                            View Answer Key
+                                                        </a>
+                                                        <a href="<%= ak.fileUrl %>" download="<%= ak.fileName %>" class="btn btn-outline btn-sm" style="border-color: #34495e; color: #34495e;">
+                                                            <i class="fas fa-download me-1"></i>
+                                                            Download
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                                
+
+
+                            </div>
+                        <% } else if (answerKey && answerKey.isPublished) { %>
+                            <!-- Single Answer Key Display - Quick Access Only -->
+                            <div class="text-center">
+                                <h6 class="mb-4">Answer Key Available</h6>
+                                <div class="row justify-content-center">
+                                    <div class="col-md-6">
+                                        <div class="card h-100" style="border-color: #34495e;">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title" style="color: #34495e;">
+                                                    <i class="fas fa-key me-2"></i>
+                                                    <%= post %> Answer Key
+                                                </h6>
+                                                <p class="card-text text-muted small">
+                                                    Published: <%= new Date(answerKey.uploadedAt).toLocaleDateString() %>
+                                                </p>
+                                                <div class="d-grid gap-2">
+                                                    <a href="<%= answerKey.fileUrl %>" target="_blank" class="btn btn-sm text-white" style="background-color: #34495e;">
+                                                        <i class="fas fa-eye me-1"></i>
+                                                        View Answer Key
+                                                    </a>
+                                                    <a href="<%= answerKey.fileUrl %>" download="<%= answerKey.fileName %>" class="btn btn-outline btn-sm" style="border-color: #34495e; color: #34495e;">
+                                                        <i class="fas fa-download me-1"></i>
+                                                        Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <!-- Answer Key Not Available -->
+                            <div class="text-center py-5">
+                                <div class="mb-4">
+                                    <i class="fas fa-lock fa-4x text-muted"></i>
+                                </div>
+                                <h5 class="text-muted mb-3">Answer Key Not Available</h5>
+                                <p class="text-muted mb-4">
+                                    The answer key will be published here once it's available. 
+                                    Please check back later.
+                                </p>
+
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="text-center mt-4">
+                    <a href="/" class="btn me-2" style="border: 1px solid #34495e; color: #34495e;">
+                        <i class="fas fa-home me-1"></i>
+                        Back to Home
+                    </a>
+                    <% if ((answerKey && answerKey.isPublished) || (answerKeys && answerKeys.length > 0)) { %>
+                        <a href="/" class="btn text-white" style="background-color: #28a745;">
+                            <i class="fas fa-user-graduate me-1"></i>
+                            Check Your Results
+                        </a>
+                    <% } %>
+                    <% if (answerKeys && answerKeys.length > 0) { %>
+                        <a href="/answer-key" class="btn ms-2 text-white" style="background-color: #34495e;">
+                            <i class="fas fa-refresh me-1"></i>
+                            View All Answer Keys
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0 text-muted">
+                &copy; <%= new Date().getFullYear() %> OMR Result Viewer. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    
+    <style>
+    @media print {
+        .btn, .navbar, footer, .mt-4 {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .card-header {
+            background-color: #000 !important;
+            color: #fff !important;
+        }
+    }
+    </style>
+</body>
+</html>

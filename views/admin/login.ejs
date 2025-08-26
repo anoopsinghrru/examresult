@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - OMR Result Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                OMR Result Viewer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/answer-key">
+                            <i class="fas fa-key me-1"></i>Answer Key
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-user-shield me-1"></i>Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid my-5">
+        <div class="row justify-content-center align-items-center min-vh-75">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-4">
+                <!-- Admin Login Card -->
+                <div class="card shadow-lg border-0">
+                    <div class="card-header text-white text-center border-0 py-4" 
+                         style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
+                        <div class="mb-3">
+                            <div class="bg-white rounded-circle d-inline-flex p-3 shadow">
+                                <i class="fas fa-user-shield fa-2x text-dark"></i>
+                            </div>
+                        </div>
+                        <h4 class="mb-0 fw-bold">Admin Portal</h4>
+                        <p class="mb-0 mt-2 opacity-75">Secure Access Required</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Display Errors -->
+                        <% if (errors && errors.length > 0) { %>
+                            <div class="alert alert-danger border-0 shadow-sm">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <div>
+                                        <ul class="mb-0">
+                                            <% errors.forEach(error => { %>
+                                                <li><%= error.msg %></li>
+                                            <% }); %>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+
+                        <form action="/admin/login" method="POST" id="adminLoginForm">
+                            <div class="mb-4">
+                                <label for="username" class="form-label fw-semibold">
+                                    <i class="fas fa-user me-2 text-primary"></i>
+                                    Username
+                                </label>
+                                <input type="text" class="form-control form-control-lg border-2" 
+                                       id="username" name="username" 
+                                       placeholder="Enter your username" required
+                                       style="border-radius: 10px;">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold">
+                                    <i class="fas fa-lock me-2 text-success"></i>
+                                    Password
+                                </label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control form-control-lg border-2" 
+                                           id="password" name="password" 
+                                           placeholder="Enter your password" required
+                                           style="border-radius: 10px; padding-right: 50px;">
+                                    <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-2" 
+                                            id="togglePassword" style="border: none; background: none;">
+                                        <i class="fas fa-eye text-muted"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-lg text-white fw-bold py-3 no-loading-state" 
+                                        style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); border: none; border-radius: 10px; box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    Access Admin Panel
+                                </button>
+                            </div>
+                        </form>
+
+
+                    </div>
+                </div>
+
+                <!-- Back Link -->
+                <div class="text-center mt-4">
+                    <a href="/" class="text-decoration-none">
+                        <div class="d-inline-flex align-items-center px-3 py-2 bg-white rounded-pill shadow-sm">
+                            <i class="fas fa-arrow-left me-2 text-primary"></i>
+                            <span class="text-muted">Back to Student Portal</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0 text-muted">
+                &copy; <%= new Date().getFullYear() %> OMR Result Viewer. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Password toggle functionality only
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        // Auto-focus username field
+        const usernameInput = document.getElementById('username');
+        if (usernameInput) {
+            usernameInput.focus();
+        }
+        
+        // No form submission interference - let it work naturally
+    });
+    </script>
+
+    <style>
+    .min-vh-75 {
+        min-height: 75vh;
+    }
+    
+    /* Enhanced form styling */
+    .form-control:focus {
+        border-color: #2c3e50;
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+        transform: translateY(-1px);
+        transition: all 0.3s ease;
+    }
+    
+    /* Button hover effects */
+    button[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4) !important;
+    }
+    
+    /* Card animations */
+    .card:hover {
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    
+    /* Feature icons animation */
+    .rounded-circle {
+        transition: all 0.3s ease;
+    }
+    
+    .rounded-circle:hover {
+        transform: rotate(360deg) scale(1.1);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 767.98px) {
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .py-4 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+    }
+    </style>
+</body>
+</html>

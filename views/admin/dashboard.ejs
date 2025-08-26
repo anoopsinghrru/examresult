@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - OMR Result Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                OMR Result Viewer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/answer-key">
+                            <i class="fas fa-key me-1"></i>Answer Key
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-user-shield me-1"></i>Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <!-- Dashboard Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-tachometer-alt me-2"></i>
+                Admin Dashboard
+            </h2>
+            <a href="/admin/logout" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt me-1"></i>
+                Logout
+            </a>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <% if (success) { %>
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle me-2"></i>
+                <%= success %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <% } %>
+
+                <% if (errors && errors.length> 0) { %>
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <ul class="mb-0">
+                            <% errors.forEach(error=> { %>
+                                <li>
+                                    <%= error.msg %>
+                                </li>
+                                <% }); %>
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <% } %>
+
+                        <!-- System Status Overview -->
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-gradient text-white"
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tachometer-alt me-2"></i>
+                                    System Status Overview
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body text-center">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="w-100">
+                                                        <h3 class="<%= isOmrPublic ? 'text-success' : 'text-danger' %>">
+                                                            <i
+                                                                class="fas <%= isOmrPublic ? 'fa-eye' : 'fa-eye-slash' %>"></i>
+                                                        </h3>
+                                                        <h6 class="mb-0">OMR Status</h6>
+                                                        <small
+                                                            class="<%= isOmrPublic ? 'text-success' : 'text-danger' %>">
+                                                            <%= isOmrPublic ? 'Public' : 'Private' %>
+                                                        </small>
+                                                        <div class="mt-2">
+                                                            <div class="row text-center">
+                                                                <div class="col-6">
+                                                                    <div class="text-primary fw-bold">
+                                                                        <%= studentsWithOMR %>
+                                                                    </div>
+                                                                    <small class="text-muted">Uploaded</small>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="text-warning fw-bold">
+                                                                        <%= students.length - studentsWithOMR %>
+                                                                    </div>
+                                                                    <small class="text-muted">Pending</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body text-center">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="w-100">
+                                                        <h3
+                                                            class="<%= isResultsPublic ? 'text-success' : 'text-danger' %>">
+                                                            <i
+                                                                class="fas <%= isResultsPublic ? 'fa-chart-line' : 'fa-clock' %>"></i>
+                                                        </h3>
+                                                        <h6 class="mb-0">Results Status</h6>
+                                                        <small
+                                                            class="<%= isResultsPublic ? 'text-success' : 'text-danger' %>">
+                                                            <%= isResultsPublic ? 'Public' : 'Private' %>
+                                                        </small>
+                                                        <div class="mt-2">
+                                                            <div class="row text-center">
+                                                                <div class="col-6">
+                                                                    <div class="text-success fw-bold">
+                                                                        <%= studentsWithResults %>
+                                                                    </div>
+                                                                    <small class="text-muted">Ready</small>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="text-secondary fw-bold">
+                                                                        <%= students.length - studentsWithResults %>
+                                                                    </div>
+                                                                    <small class="text-muted">Pending</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body text-center">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="w-100">
+                                                        <h3 class="text-primary">
+                                                            <i class="fas fa-users"></i>
+                                                        </h3>
+                                                        <h6 class="mb-0">Students</h6>
+                                                        <small class="text-primary">
+                                                            <%= students.length %> Total
+                                                        </small>
+                                                        <div class="mt-2">
+                                                            <div class="row text-center">
+                                                                <div class="col-6">
+                                                                    <div class="text-info fw-bold">
+                                                                        <%= Math.round((studentsWithOMR /
+                                                                            students.length) * 100) %>%
+                                                                    </div>
+                                                                    <small class="text-muted">w/ OMR</small>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="text-success fw-bold">
+                                                                        <%= Math.round((studentsWithResults /
+                                                                            students.length) * 100) %>%
+                                                                    </div>
+                                                                    <small class="text-muted">w/ Results</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body text-center">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="w-100">
+                                                        <h3
+                                                            class="<%= answerKeys && answerKeys.length > 0 ? 'text-success' : 'text-warning' %>">
+                                                            <i class="fas fa-key"></i>
+                                                        </h3>
+                                                        <h6 class="mb-0">Answer Keys</h6>
+                                                        <small
+                                                            class="<%= answerKeys && answerKeys.length > 0 ? 'text-success' : 'text-warning' %>">
+                                                            <%= answerKeys && answerKeys.length> 0 ? answerKeys.length +
+                                                                ' Posts' : 'None Uploaded' %>
+                                                        </small>
+                                                        <div class="mt-2">
+                                                            <div class="text-center">
+                                                                <% if (answerKeys && answerKeys.length> 0) { %>
+                                                                    <% const publishedKeys=answerKeys.filter(ak=>
+                                                                        ak.isPublished).length; %>
+                                                                        <div class="text-primary fw-bold">
+                                                                            <%= publishedKeys %>/<%= answerKeys.length
+                                                                                    %>
+                                                                        </div>
+                                                                        <small class="text-muted">Published</small>
+                                                                        <% } else { %>
+                                                                            <div class="text-muted fw-bold">0/6</div>
+                                                                            <small class="text-muted">Upload
+                                                                                needed</small>
+                                                                            <% } %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- Quick Actions -->
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-bolt me-2"></i>
+                                    Quick Actions
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <button class="btn <%= isOmrPublic ? 'btn-warning' : 'btn-success' %> w-100"
+                                            onclick="toggleOMRPublic(<%= !isOmrPublic %>)">
+                                            <i class="fas <%= isOmrPublic ? 'fa-eye-slash' : 'fa-eye' %> me-2"></i>
+                                            Make OMR <%= isOmrPublic ? 'Private' : 'Public' %>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn <%= isResultsPublic ? 'btn-warning' : 'btn-success' %> w-100"
+                                            onclick="toggleResultsPublic(<%= !isResultsPublic %>)">
+                                            <i
+                                                class="fas <%= isResultsPublic ? 'fa-clock' : 'fa-chart-line' %> me-2"></i>
+                                            Make Results <%= isResultsPublic ? 'Private' : 'Public' %>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-info w-100" onclick="location.reload()">
+                                            <i class="fas fa-sync-alt me-2"></i>
+                                            Refresh Status
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Management Tabs -->
+                        <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="students-tab" data-bs-toggle="tab"
+                                    data-bs-target="#students" type="button">
+                                    <i class="fas fa-users me-1"></i>Students
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="omr-tab" data-bs-toggle="tab" data-bs-target="#omr"
+                                    type="button">
+                                    <i class="fas fa-file-image me-1"></i>OMR Sheets
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="results-tab" data-bs-toggle="tab" data-bs-target="#results"
+                                    type="button">
+                                    <i class="fas fa-chart-bar me-1"></i>Results
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="answer-key-tab" data-bs-toggle="tab"
+                                    data-bs-target="#answer-key" type="button">
+                                    <i class="fas fa-key me-1"></i>Answer Key
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="adminTabsContent">
+                            <!-- Students Tab -->
+                            <div class="tab-pane fade show active" id="students" role="tabpanel">
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Student Management</h5>
+                                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#addStudentModal">
+                                                <i class="fas fa-plus me-1"></i>Add Student
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Search and Bulk Upload -->
+                                        <div class="row mb-4">
+                                            <div class="col-md-4">
+                                                <label for="studentSearch" class="form-label">Search Students</label>
+                                                <input type="text" class="form-control" id="studentSearch"
+                                                    placeholder="Search by roll no, name, mobile...">
+                                            </div>
+                                            <div class="col-md-8">
+                                                <form action="/admin/students/bulk" method="POST"
+                                                    enctype="multipart/form-data" class="d-flex align-items-end">
+                                                    <div class="flex-grow-1 me-2">
+                                                        <label for="studentExcel" class="form-label">Bulk Upload
+                                                            Students (Excel)</label>
+                                                        <input type="file" class="form-control" id="studentExcel"
+                                                            name="excelFile" accept=".xlsx,.xls" required>
+                                                        <div class="form-text">Excel: rollNo, name, dob (DD/MM/YYYY),
+                                                            mobile, postApplied</div>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="fas fa-upload me-1"></i>Upload
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <!-- Students Table -->
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Roll No</th>
+                                                        <th>Name</th>
+                                                        <th>DOB</th>
+                                                        <th>Mobile</th>
+                                                        <th>Post Applied</th>
+                                                        <th>OMR</th>
+                                                        <th>Results</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% students.forEach(student=> { %>
+                                                        <tr id="student-<%= student.rollNo %>">
+                                                            <td>
+                                                                <%= student.rollNo %>
+                                                            </td>
+                                                            <td>
+                                                                <%= student.name %>
+                                                            </td>
+                                                            <td>
+                                                                <%= new Date(student.dob).toLocaleDateString('en-GB') %>
+                                                            </td>
+                                                            <td>
+                                                                <%= student.mobile %>
+                                                            </td>
+                                                            <td>
+                                                                <%= student.postApplied %>
+                                                            </td>
+                                                            <td>
+                                                                <% if (student.omrImageUrl) { %>
+                                                                    <div class="d-flex align-items-center flex-wrap">
+                                                                        <span class="badge bg-success me-2 mb-1">
+                                                                            <i class="fas fa-check me-1"></i>Uploaded
+                                                                        </span>
+                                                                        <div class="btn-group btn-group-sm"
+                                                                            role="group">
+                                                                            <button class="btn btn-outline-primary"
+                                                                                onclick="viewOMR('<%= student.omrImageUrl %>', '<%= student.rollNo %>')"
+                                                                                title="View OMR">
+                                                                                <i class="fas fa-eye"></i>
+                                                                            </button>
+                                                                            <button class="btn btn-outline-warning"
+                                                                                onclick="uploadOMRForStudent('<%= student.rollNo %>')"
+                                                                                title="Replace OMR">
+                                                                                <i class="fas fa-upload"></i>
+                                                                            </button>
+                                                                            <button class="btn btn-outline-danger"
+                                                                                onclick="deleteOMR('<%= student.rollNo %>')"
+                                                                                title="Delete OMR">
+                                                                                <i class="fas fa-trash"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% } else { %>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="badge bg-warning me-2">
+                                                                                <i class="fas fa-clock me-1"></i>Pending
+                                                                            </span>
+                                                                            <button
+                                                                                class="btn btn-outline-success btn-sm"
+                                                                                onclick="uploadOMRForStudent('<%= student.rollNo %>')"
+                                                                                title="Upload OMR">
+                                                                                <i class="fas fa-upload"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                        <% } %>
+                                                            </td>
+                                                            <td>
+                                                                <% if (student.results && typeof
+                                                                    student.results==='object' &&
+                                                                    student.results.finalScore !==undefined) { %>
+                                                                    <div class="d-flex align-items-center flex-wrap">
+                                                                        <span class="badge bg-success me-2 mb-1">
+                                                                            <i class="fas fa-check me-1"></i>Available
+                                                                        </span>
+                                                                        <div class="btn-group btn-group-sm"
+                                                                            role="group">
+                                                                            <button class="btn btn-outline-primary"
+                                                                                onclick="viewResults('<%= student.rollNo %>')"
+                                                                                title="View Results">
+                                                                                <i class="fas fa-eye"></i>
+                                                                            </button>
+                                                                            <button class="btn btn-outline-warning"
+                                                                                onclick="editResultsForStudent('<%= student.rollNo %>')"
+                                                                                title="Edit Results">
+                                                                                <i class="fas fa-edit"></i>
+                                                                            </button>
+                                                                            <button class="btn btn-outline-danger"
+                                                                                onclick="deleteResults('<%= student.rollNo %>')"
+                                                                                title="Delete Results">
+                                                                                <i class="fas fa-trash"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% } else { %>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="badge bg-warning me-2">
+                                                                                <i class="fas fa-clock me-1"></i>Pending
+                                                                            </span>
+                                                                            <button
+                                                                                class="btn btn-outline-success btn-sm"
+                                                                                onclick="addResultsForStudent('<%= student.rollNo %>')"
+                                                                                title="Add Results">
+                                                                                <i class="fas fa-plus"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                        <% } %>
+                                                            </td>
+                                                            <td>
+                                                                <div class="btn-group" role="group">
+                                                                    <button class="btn btn-outline-primary btn-sm"
+                                                                        onclick="editStudent('<%= student.rollNo %>')"
+                                                                        title="Edit Student">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </button>
+                                                                    <button class="btn btn-outline-danger btn-sm"
+                                                                        onclick="deleteStudent('<%= student.rollNo %>')"
+                                                                        title="Delete Student">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        <% }); %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OMR Tab -->
+                            <div class="tab-pane fade" id="omr" role="tabpanel">
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">OMR Sheet Management</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- OMR Public Toggle -->
+                                        <div class="mb-4">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="omrPublicToggle"
+                                                    <%=isOmrPublic ? 'checked' : '' %>>
+                                                <label class="form-check-label" for="omrPublicToggle">
+                                                    Make OMR sheets public for students
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Bulk OMR Upload -->
+                                        <form action="/admin/omr/bulk" method="POST" enctype="multipart/form-data">
+                                            <div class="row align-items-end">
+                                                <div class="col-md-8">
+                                                    <label for="omrZip" class="form-label">Upload OMR Sheets
+                                                        (ZIP)</label>
+                                                    <input type="file" class="form-control" id="omrZip" name="zipFile"
+                                                        accept=".zip" required>
+                                                    <div class="form-text">ZIP should contain image files named as
+                                                        rollNo.jpg/png/jpeg</div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-upload me-1"></i>Upload OMR Sheets
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Results Tab -->
+                            <div class="tab-pane fade" id="results" role="tabpanel">
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Results Management</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Results Public Toggle -->
+                                        <div class="mb-4">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="resultsPublicToggle"
+                                                    <%=isResultsPublic ? 'checked' : '' %>>
+                                                <label class="form-check-label" for="resultsPublicToggle">
+                                                    Make results public for students
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Bulk Results Upload -->
+                                        <form action="/admin/results/bulk" method="POST" enctype="multipart/form-data">
+                                            <div class="row align-items-end">
+                                                <div class="col-md-8">
+                                                    <label for="resultsExcel" class="form-label">Upload Results
+                                                        (Excel)</label>
+                                                    <input type="file" class="form-control" id="resultsExcel"
+                                                        name="excelFile" accept=".xlsx,.xls" required>
+                                                    <div class="form-text">Excel should have columns: rollNo,
+                                                        correctAnswers, wrongAnswers, unattempted</div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="fas fa-upload me-1"></i>Upload Results
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Answer Key Tab -->
+                            <div class="tab-pane fade" id="answer-key" role="tabpanel">
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Answer Key Management</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Global Answer Key Controls -->
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-md-8">
+                                                                <h6 class="mb-1">
+                                                                    <i class="fas fa-globe me-2"></i>
+                                                                    Global Answer Key Controls
+                                                                </h6>
+                                                                <p class="text-muted mb-0">Manage publication status for
+                                                                    all answer keys at once</p>
+                                                            </div>
+                                                            <div class="col-md-4 text-end">
+                                                                <button class="btn btn-success me-2"
+                                                                    onclick="toggleAllAnswerKeys(true)">
+                                                                    <i class="fas fa-eye me-1"></i>
+                                                                    Publish All
+                                                                </button>
+                                                                <button class="btn btn-warning"
+                                                                    onclick="toggleAllAnswerKeys(false)">
+                                                                    <i class="fas fa-eye-slash me-1"></i>
+                                                                    Unpublish All
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Post-wise Answer Key Status -->
+                                        <div class="row mb-4">
+                                            <% posts.forEach(post=> { %>
+                                                <div class="col-md-4 mb-3">
+                                                    <div
+                                                        class="card border-<%= answerKeysByPost[post] ? (answerKeysByPost[post].isPublished ? 'success' : 'warning') : 'secondary' %>">
+                                                        <div
+                                                            class="card-header bg-<%= answerKeysByPost[post] ? (answerKeysByPost[post].isPublished ? 'success' : 'warning') : 'secondary' %> text-white">
+                                                            <h6 class="mb-0">
+                                                                <%= post %> Answer Key
+                                                            </h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <% if (answerKeysByPost[post]) { %>
+                                                                <p class="mb-2"><strong>File:</strong>
+                                                                    <%= answerKeysByPost[post].fileName %>
+                                                                </p>
+                                                                <p class="mb-2"><strong>Status:</strong>
+                                                                    <span
+                                                                        class="badge <%= answerKeysByPost[post].isPublished ? 'bg-success' : 'bg-warning' %>">
+                                                                        <%= answerKeysByPost[post].isPublished
+                                                                            ? 'Published' : 'Not Published' %>
+                                                                    </span>
+                                                                </p>
+                                                                <p class="mb-3"><strong>Uploaded:</strong>
+                                                                    <%= new
+                                                                        Date(answerKeysByPost[post].uploadedAt).toLocaleDateString()
+                                                                        %>
+                                                                </p>
+
+                                                                <div class="d-flex gap-2 flex-wrap">
+                                                                    <button
+                                                                        class="btn btn-sm <%= answerKeysByPost[post].isPublished ? 'btn-warning' : 'btn-success' %>"
+                                                                        onclick="toggleAnswerKeyPublication('<%= post %>', <%= !answerKeysByPost[post].isPublished %>)"
+                                                                        id="toggle-<%= post %>">
+                                                                        <i
+                                                                            class="fas <%= answerKeysByPost[post].isPublished ? 'fa-eye-slash' : 'fa-eye' %> me-1"></i>
+                                                                        <%= answerKeysByPost[post].isPublished
+                                                                            ? 'Unpublish' : 'Publish' %>
+                                                                    </button>
+                                                                    <a href="<%= answerKeysByPost[post].fileUrl %>"
+                                                                        target="_blank"
+                                                                        class="btn btn-sm btn-outline-primary">
+                                                                        <i class="fas fa-eye me-1"></i>View
+                                                                    </a>
+                                                                    <button class="btn btn-sm btn-outline-danger"
+                                                                        onclick="deleteAnswerKey('<%= post %>')"
+                                                                        title="Delete Answer Key">
+                                                                        <i class="fas fa-trash me-1"></i>Delete
+                                                                    </button>
+                                                                </div>
+                                                                <div class="mt-2">
+                                                                    <button
+                                                                        class="btn btn-sm btn-outline-secondary w-100"
+                                                                        onclick="uploadAnswerKeyForPost('<%= post %>')"
+                                                                        title="Upload New Answer Key">
+                                                                        <i class="fas fa-upload me-1"></i>Upload New
+                                                                    </button>
+                                                                </div>
+                                                                <% } else { %>
+                                                                    <p class="text-muted mb-3">No answer key uploaded
+                                                                        for <%= post %>
+                                                                    </p>
+                                                                    <button class="btn btn-sm btn-outline-primary"
+                                                                        onclick="uploadAnswerKeyForPost('<%= post %>')">
+                                                                        <i class="fas fa-upload me-1"></i>Upload
+                                                                    </button>
+                                                                    <% } %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <% }); %>
+                                        </div>
+
+                                        <!-- Upload New Answer Key -->
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Upload / Replace Answer Key</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="alert alert-info mb-3">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    <strong>Note:</strong> Uploading a new answer key for an existing
+                                                    post will replace the current one.
+                                                </div>
+                                                <form action="/admin/answer-key" method="POST"
+                                                    enctype="multipart/form-data">
+                                                    <div class="row align-items-end">
+                                                        <div class="col-md-3">
+                                                            <label for="postType" class="form-label">Post Type</label>
+                                                            <select class="form-select" id="postType" name="postType"
+                                                                required>
+                                                                <option value="">Select Post</option>
+                                                                <% posts.forEach(post=> { %>
+                                                                    <option value="<%= post %>">
+                                                                        <%= post %>
+                                                                    </option>
+                                                                    <% }); %>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label for="answerKeyFile" class="form-label">Answer Key
+                                                                File</label>
+                                                            <input type="file" class="form-control" id="answerKeyFile"
+                                                                name="answerKeyFile" accept=".pdf,image/*" required>
+                                                            <div class="form-text">Supported: PDF, JPG, PNG</div>
+                                                        </div>
+
+                                                        <div class="col-md-2">
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i class="fas fa-upload me-1"></i>Upload
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Student Modal -->
+                        <div class="modal fade" id="addStudentModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Add New Student</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form action="/admin/students" method="POST">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label for="rollNo" class="form-label">Roll Number</label>
+                                                <input type="text" class="form-control" id="rollNo" name="rollNo"
+                                                    required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="name" class="form-label">Name</label>
+                                                <input type="text" class="form-control" id="name" name="name" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="dob" class="form-label">Date of Birth</label>
+                                                <input type="text" class="form-control" id="dob" name="dob"
+                                                    placeholder="DD/MM/YYYY" maxlength="10" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="mobile" class="form-label">Mobile Number</label>
+                                                <input type="tel" class="form-control" id="mobile" name="mobile"
+                                                    placeholder="10 digit mobile number" maxlength="10" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="postApplied" class="form-label">Post Applied</label>
+                                                <select class="form-select" id="postApplied" name="postApplied"
+                                                    required>
+                                                    <option value="">Select Post</option>
+                                                    <% posts.forEach(post=> { %>
+                                                        <option value="<%= post %>">
+                                                            <%= post %>
+                                                        </option>
+                                                        <% }); %>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Add Student</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Edit Student Modal -->
+                        <div class="modal fade" id="editStudentModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Edit Student</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form id="editStudentForm">
+                                        <div class="modal-body">
+                                            <input type="hidden" id="editRollNo" name="rollNo">
+                                            <div class="mb-3">
+                                                <label for="editName" class="form-label">Name</label>
+                                                <input type="text" class="form-control" id="editName" name="name"
+                                                    required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="editDob" class="form-label">Date of Birth</label>
+                                                <input type="text" class="form-control" id="editDob" name="dob"
+                                                    placeholder="DD/MM/YYYY" maxlength="10" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="editMobile" class="form-label">Mobile Number</label>
+                                                <input type="tel" class="form-control" id="editMobile" name="mobile"
+                                                    placeholder="10 digit mobile number" maxlength="10" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="editPostApplied" class="form-label">Post Applied</label>
+                                                <select class="form-select" id="editPostApplied" name="postApplied"
+                                                    required>
+                                                    <option value="">Select Post</option>
+                                                    <% posts.forEach(post=> { %>
+                                                        <option value="<%= post %>">
+                                                            <%= post %>
+                                                        </option>
+                                                        <% }); %>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Update Student</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload OMR Modal -->
+                        <div class="modal fade" id="uploadOMRModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Upload OMR Sheet</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form id="uploadOMRForm" enctype="multipart/form-data">
+                                        <div class="modal-body">
+                                            <input type="hidden" id="omrRollNo" name="rollNo">
+                                            <div class="mb-3">
+                                                <label class="form-label">Student: <span id="omrStudentName"
+                                                        class="fw-bold"></span></label>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="omrFile" class="form-label">OMR Sheet File</label>
+                                                <input type="file" class="form-control" id="omrFile" name="omrFile"
+                                                    accept="image/*,.pdf" required>
+                                                <div class="form-text">Supported formats: JPG, PNG, PDF</div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Upload OMR</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add/Edit Results Modal -->
+                        <div class="modal fade" id="addResultsModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="addResultsModalLabel">Add Results</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form id="addResultsForm">
+                                        <div class="modal-body">
+                                            <input type="hidden" id="resultsRollNo" name="rollNo">
+
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                <strong>50 Questions Total:</strong> Enter the count of correct, wrong,
+                                                and unattempted answers.
+                                                The system will automatically calculate the final score using the
+                                                formula:
+                                                <code>(Correct × 2) - (Wrong × 0.25)</code>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="mb-3">
+                                                        <label for="resultsCorrectAnswers" class="form-label">
+                                                            <i class="fas fa-check text-success me-1"></i>Correct
+                                                            Answers
+                                                        </label>
+                                                        <input type="number" class="form-control"
+                                                            id="resultsCorrectAnswers" name="correctAnswers" min="0"
+                                                            max="50" required onchange="updateResultsPreview()">
+                                                        <div class="form-text">+2 marks each</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="mb-3">
+                                                        <label for="resultsWrongAnswers" class="form-label">
+                                                            <i class="fas fa-times text-danger me-1"></i>Wrong Answers
+                                                        </label>
+                                                        <input type="number" class="form-control"
+                                                            id="resultsWrongAnswers" name="wrongAnswers" min="0"
+                                                            max="50" required onchange="updateResultsPreview()">
+                                                        <div class="form-text">-0.25 marks each</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="mb-3">
+                                                        <label for="resultsUnattempted" class="form-label">
+                                                            <i class="fas fa-minus text-warning me-1"></i>Unattempted
+                                                        </label>
+                                                        <input type="number" class="form-control"
+                                                            id="resultsUnattempted" name="unattempted" min="0" max="50"
+                                                            required onchange="updateResultsPreview()">
+                                                        <div class="form-text">0 marks each</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Score Preview -->
+                                            <div class="card bg-light">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">Score Preview</h6>
+                                                    <div class="row text-center">
+                                                        <div class="col-6">
+                                                            <div class="h5 mb-0" id="previewScore">0/100</div>
+                                                            <small class="text-muted">Final Score</small>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="h5 mb-0" id="previewPercentage">0%</div>
+                                                            <small class="text-muted">Percentage</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted" id="previewCalculation">
+                                                            Calculation: (0 × 2) - (0 × 0.25) = 0
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Save Results</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View OMR Modal -->
+                        <div class="modal fade" id="viewOMRModal" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">OMR Sheet - <span id="omrViewStudentRoll"></span></h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img id="omrViewImage" src="" alt="OMR Sheet" class="img-fluid"
+                                            style="max-height: 70vh;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View Results Modal -->
+                        <div class="modal fade" id="viewResultsModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Results - <span id="resultsViewStudentRoll"></span></h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="resultsViewContent"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0 text-muted">
+                &copy; <%= new Date().getFullYear() %> OMR Result Viewer. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        // Initialize UI state on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Dashboard loaded - OMR Public:', <%= isOmrPublic %>, 'Results Public:', <%= isResultsPublic %>);
+
+            // Ensure all UI elements are synchronized with server state
+            const isOmrPublic = <%= isOmrPublic %>;
+            const isResultsPublic = <%= isResultsPublic %>;
+
+            // Force update all UI elements to match server state
+            updateOMRStatus(isOmrPublic);
+            updateResultsStatus(isResultsPublic);
+
+            console.log('UI synchronized with server state');
+        });
+    </script>
+    <script>
+        // OMR Public Toggle (if toggle exists)
+        const omrToggle = document.getElementById('omrPublicToggle');
+        if (omrToggle) {
+            omrToggle.addEventListener('change', function () {
+                const isPublic = this.checked;
+
+                fetch('/admin/omr/public', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ isPublic: isPublic })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+                            // Update UI elements without page reload
+                            updateOMRStatus(isPublic);
+                        } else {
+                            showAlert('danger', data.message);
+                            this.checked = !isPublic; // Revert toggle
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'Error updating OMR public status');
+                        this.checked = !isPublic; // Revert toggle
+                    });
+            });
+        }
+
+        // Results Public Toggle (if toggle exists)
+        const resultsToggle = document.getElementById('resultsPublicToggle');
+        if (resultsToggle) {
+            resultsToggle.addEventListener('change', function () {
+                const isPublic = this.checked;
+
+                fetch('/admin/results/public', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ isPublic: isPublic })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+                            // Update UI elements without page reload
+                            updateResultsStatus(isPublic);
+                        } else {
+                            showAlert('danger', data.message);
+                            this.checked = !isPublic; // Revert toggle
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'Error updating Results public status');
+                        this.checked = !isPublic; // Revert toggle
+                    });
+            });
+        }
+
+        // Delete Student
+        function deleteStudent(rollNo) {
+            if (confirm('Are you sure you want to delete this student?')) {
+                fetch('/admin/students/' + rollNo, {
+                    method: 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+                            // Remove the student row from table without page reload
+                            const studentRows = document.querySelectorAll('tbody tr');
+                            studentRows.forEach(row => {
+                                const rollNoCell = row.querySelector('td:first-child');
+                                if (rollNoCell && rollNoCell.textContent.trim() === rollNo) {
+                                    row.remove();
+                                }
+                            });
+                            // Update statistics (would need to recalculate, but for now just show success)
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'Error deleting student');
+                    });
+            }
+        }
+
+        // Delete OMR Sheet
+        function deleteOMR(rollNo) {
+            if (confirm('Are you sure you want to delete the OMR sheet for ' + rollNo + '?')) {
+                fetch('/admin/omr/' + rollNo, {
+                    method: 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+                            // Update the OMR cell in the table
+                            const row = document.getElementById('student-' + rollNo);
+                            if (row) {
+                                const omrCell = row.cells[5]; // OMR column (0-indexed)
+                                omrCell.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-warning me-2">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                                <button class="btn btn-outline-success btn-sm" 
+                                        onclick="uploadOMRForStudent('${rollNo}')"
+                                        title="Upload OMR">
+                                    <i class="fas fa-upload"></i>
+                                </button>
+                            </div>
+                        `;
+                            }
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'Error deleting OMR sheet');
+                    });
+            }
+        }
+
+        // Toggle Answer Key Publication
+        function toggleAnswerKeyPublication(postType, publish) {
+            console.log('Toggling answer key:', { postType, publish, type: typeof publish });
+
+            fetch('/admin/answer-key/publish', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ postType: postType, isPublished: publish })
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        // Reload page to update all UI elements
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showAlert('danger', data.message || 'Unknown error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Error updating answer key publication status: ' + error.message);
+                });
+        }
+
+        // Toggle All Answer Keys Publication
+        function toggleAllAnswerKeys(publish) {
+            const posts = ['DCO', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'];
+            const action = publish ? 'publish' : 'unpublish';
+
+            if (!confirm(`Are you sure you want to ${action} all answer keys?`)) {
+                return;
+            }
+
+            fetch('/admin/answer-key/publish-all', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ isPublished: publish })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        // Reload page to update all UI elements
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Error updating answer key publication status');
+                });
+        }
+
+        // Upload Answer Key for Specific Post
+        function uploadAnswerKeyForPost(postType) {
+            // Set the post type in the form and scroll to upload section
+            document.getElementById('postType').value = postType;
+            document.getElementById('answer-key-tab').click();
+            document.getElementById('answerKeyFile').focus();
+        }
+
+        // Delete Answer Key
+        function deleteAnswerKey(postType) {
+            if (!confirm(`Are you sure you want to delete the answer key for ${postType}? This action cannot be undone.`)) {
+                return;
+            }
+
+            fetch('/admin/answer-key/delete', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ postType: postType })
+            })
+                .then(response => {
+                    console.log('Delete response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Delete response data:', data);
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        // Reload page to update all UI elements
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showAlert('danger', data.message || 'Unknown error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Error deleting answer key: ' + error.message);
+                });
+        }
+
+        // Update Answer Key Status UI Elements
+        function updateAnswerKeyStatus(isPublished) {
+            // Update status overview card
+            const answerKeyCard = document.querySelector('.col-md-3:nth-child(4)');
+            if (answerKeyCard) {
+                const h3Element = answerKeyCard.querySelector('h3');
+                const statusText = answerKeyCard.querySelector('small');
+
+                if (isPublished) {
+                    h3Element.className = 'text-success';
+                    statusText.className = 'text-success';
+                    statusText.textContent = 'Published';
+                } else {
+                    h3Element.className = 'text-warning';
+                    statusText.className = 'text-warning';
+                    statusText.textContent = 'Not Published';
+                }
+            }
+
+            // Update answer key button in Answer Key tab
+            const answerKeyButton = document.querySelector('button[onclick*="toggleAnswerKeyPublication"]');
+            if (answerKeyButton) {
+                if (isPublished) {
+                    answerKeyButton.className = 'btn btn-sm btn-warning';
+                    answerKeyButton.innerHTML = '<i class="fas fa-eye-slash me-1"></i>Unpublish';
+                    answerKeyButton.setAttribute('onclick', 'toggleAnswerKeyPublication(false)');
+                } else {
+                    answerKeyButton.className = 'btn btn-sm btn-success';
+                    answerKeyButton.innerHTML = '<i class="fas fa-eye me-1"></i>Publish';
+                    answerKeyButton.setAttribute('onclick', 'toggleAnswerKeyPublication(true)');
+                }
+            }
+
+            // Update visibility status badge
+            const answerKeyBadge = document.querySelector('.badge:contains("Answer Key")');
+            if (answerKeyBadge) {
+                answerKeyBadge.className = `badge ${isPublished ? 'bg-success' : 'bg-warning'} me-2`;
+                answerKeyBadge.innerHTML = `<i class="fas fa-key me-1"></i>Answer Key ${isPublished ? 'Published' : 'Not Published'}`;
+            }
+        }
+
+        // Toggle OMR Public Status
+        function toggleOMRPublic(isPublic) {
+            fetch('/admin/omr/public', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ isPublic: isPublic })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        // Update UI elements without page reload
+                        updateOMRStatus(isPublic);
+                    } else {
+                        showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Error updating OMR public status');
+                });
+        }
+
+        // Toggle Results Public Status
+        function toggleResultsPublic(isPublic) {
+            fetch('/admin/results/public', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ isPublic: isPublic })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        // Update UI elements without page reload
+                        updateResultsStatus(isPublic);
+                    } else {
+                        showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Error updating Results public status');
+                });
+        }
+
+        // Update OMR Status UI Elements
+        function updateOMRStatus(isPublic) {
+            console.log('Updating OMR status to:', isPublic);
+
+            // Update status overview card - find by checking for OMR Status text
+            const statusCards = document.querySelectorAll('.col-md-3');
+            statusCards.forEach(card => {
+                const heading = card.querySelector('h6');
+                if (heading && heading.textContent.trim() === 'OMR Status') {
+                    const icon = card.querySelector('h3 i');
+                    const statusText = card.querySelector('small');
+                    const h3Element = card.querySelector('h3');
+
+                    if (isPublic) {
+                        h3Element.className = 'text-success';
+                        icon.className = 'fas fa-eye';
+                        statusText.className = 'text-success';
+                        statusText.textContent = 'Public';
+                    } else {
+                        h3Element.className = 'text-danger';
+                        icon.className = 'fas fa-eye-slash';
+                        statusText.className = 'text-danger';
+                        statusText.textContent = 'Private';
+                    }
+                }
+            });
+
+            // Update quick action button
+            const omrButton = document.querySelector('button[onclick*="toggleOMRPublic"]');
+            if (omrButton) {
+                if (isPublic) {
+                    omrButton.className = 'btn btn-warning w-100';
+                    omrButton.innerHTML = '<i class="fas fa-eye-slash me-2"></i>Make OMR Private';
+                    omrButton.setAttribute('onclick', 'toggleOMRPublic(false)');
+                } else {
+                    omrButton.className = 'btn btn-success w-100';
+                    omrButton.innerHTML = '<i class="fas fa-eye me-2"></i>Make OMR Public';
+                    omrButton.setAttribute('onclick', 'toggleOMRPublic(true)');
+                }
+            }
+
+            // Update toggle switch in OMR tab
+            const omrToggle = document.getElementById('omrPublicToggle');
+            if (omrToggle) {
+                omrToggle.checked = isPublic;
+            }
+
+            // Update visibility status badges - find by text content
+            const badges = document.querySelectorAll('.badge');
+            badges.forEach(badge => {
+                if (badge.textContent.includes('OMR')) {
+                    badge.className = `badge ${isPublic ? 'bg-success' : 'bg-danger'} me-2`;
+                    badge.innerHTML = `<i class="fas ${isPublic ? 'fa-eye' : 'fa-eye-slash'} me-1"></i>OMR ${isPublic ? 'Public' : 'Private'}`;
+                }
+            });
+        }
+
+        // Update Results Status UI Elements
+        function updateResultsStatus(isPublic) {
+            console.log('Updating Results status to:', isPublic);
+
+            // Update status overview card - find by checking for Results Status text
+            const statusCards = document.querySelectorAll('.col-md-3');
+            statusCards.forEach(card => {
+                const heading = card.querySelector('h6');
+                if (heading && heading.textContent.trim() === 'Results Status') {
+                    const icon = card.querySelector('h3 i');
+                    const statusText = card.querySelector('small');
+                    const h3Element = card.querySelector('h3');
+
+                    if (isPublic) {
+                        h3Element.className = 'text-success';
+                        icon.className = 'fas fa-chart-line';
+                        statusText.className = 'text-success';
+                        statusText.textContent = 'Public';
+                    } else {
+                        h3Element.className = 'text-danger';
+                        icon.className = 'fas fa-clock';
+                        statusText.className = 'text-danger';
+                        statusText.textContent = 'Private';
+                    }
+                }
+            });
+
+            // Update quick action button
+            const resultsButton = document.querySelector('button[onclick*="toggleResultsPublic"]');
+            if (resultsButton) {
+                if (isPublic) {
+                    resultsButton.className = 'btn btn-warning w-100';
+                    resultsButton.innerHTML = '<i class="fas fa-clock me-2"></i>Make Results Private';
+                    resultsButton.setAttribute('onclick', 'toggleResultsPublic(false)');
+                } else {
+                    resultsButton.className = 'btn btn-success w-100';
+                    resultsButton.innerHTML = '<i class="fas fa-chart-line me-2"></i>Make Results Public';
+                    resultsButton.setAttribute('onclick', 'toggleResultsPublic(true)');
+                }
+            }
+
+            // Update toggle switch in Results tab
+            const resultsToggle = document.getElementById('resultsPublicToggle');
+            if (resultsToggle) {
+                resultsToggle.checked = isPublic;
+            }
+
+            // Update visibility status badges - find by text content
+            const badges = document.querySelectorAll('.badge');
+            badges.forEach(badge => {
+                if (badge.textContent.includes('Results')) {
+                    badge.className = `badge ${isPublic ? 'bg-success' : 'bg-danger'} me-2`;
+                    badge.innerHTML = `<i class="fas ${isPublic ? 'fa-chart-line' : 'fa-clock'} me-1"></i>Results ${isPublic ? 'Public' : 'Private'}`;
+                }
+            });
+        }
+
+        // Show Alert
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show';
+            alertDiv.innerHTML = message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Format date input in admin form
+        const dobInput = document.getElementById('dob');
+        if (dobInput) {
+            dobInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2);
+                }
+                if (value.length >= 5) {
+                    value = value.substring(0, 5) + '/' + value.substring(5, 9);
+                }
+
+                e.target.value = value;
+            });
+        }
+
+        // Format mobile input in admin form (only digits)
+        const mobileInput = document.getElementById('mobile');
+        if (mobileInput) {
+            mobileInput.addEventListener('input', function (e) {
+                e.target.value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+            });
+        }
+
+        // Individual Student Management Functions
+        function editStudent(rollNo) {
+            // Fetch student data from server to ensure accuracy
+            fetch('/admin/students/' + rollNo)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.student) {
+                        const student = data.student;
+                        document.getElementById('editRollNo').value = student.rollNo;
+                        document.getElementById('editName').value = student.name;
+
+                        // Format date as DD/MM/YYYY
+                        const dobDate = new Date(student.dob);
+                        const formattedDob = dobDate.getDate().toString().padStart(2, '0') + '/' +
+                            (dobDate.getMonth() + 1).toString().padStart(2, '0') + '/' +
+                            dobDate.getFullYear();
+                        document.getElementById('editDob').value = formattedDob;
+
+                        document.getElementById('editMobile').value = student.mobile;
+                        document.getElementById('editPostApplied').value = student.postApplied;
+
+                        new bootstrap.Modal(document.getElementById('editStudentModal')).show();
+                    } else {
+                        showAlert('danger', 'Failed to load student data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching student data:', error);
+                    showAlert('danger', 'Error loading student data');
+                });
+        }
+
+        function uploadOMRForStudent(rollNo) {
+            const row = document.getElementById('student-' + rollNo);
+            const studentName = row.querySelectorAll('td')[1].textContent;
+
+            document.getElementById('omrRollNo').value = rollNo;
+            document.getElementById('omrStudentName').textContent = studentName;
+
+            new bootstrap.Modal(document.getElementById('uploadOMRModal')).show();
+        }
+
+        function addResultsForStudent(rollNo) {
+            const row = document.getElementById('student-' + rollNo);
+            const studentName = row.querySelectorAll('td')[1].textContent;
+
+            document.getElementById('resultsRollNo').value = rollNo;
+            document.getElementById('resultsStudentName').textContent = studentName;
+
+            // Reset subjects container
+            const container = document.getElementById('subjectsContainer');
+            container.innerHTML = `
+            <div class="row mb-2">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" name="subjectName[]" placeholder="Subject Name" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="number" class="form-control" name="subjectMark[]" placeholder="Marks" min="0" max="100" required>
+                </div>
+            </div>
+        `;
+
+            new bootstrap.Modal(document.getElementById('addResultsModal')).show();
+        }
+
+        function viewOMR(imageUrl, rollNo) {
+            document.getElementById('omrViewStudentRoll').textContent = rollNo;
+            document.getElementById('omrViewImage').src = imageUrl;
+
+            new bootstrap.Modal(document.getElementById('viewOMRModal')).show();
+        }
+
+        function viewResults(rollNo) {
+            // Find student data from the table
+            const row = document.getElementById('student-' + rollNo);
+            const studentName = row.querySelectorAll('td')[1].textContent;
+
+            document.getElementById('resultsViewStudentRoll').textContent = + ' - ' + studentName;
+
+            // Fetch results from server
+            fetch('/admin/students/' + rollNo + '/results')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.results) {
+                        let html = '<div class="row text-center mb-3">';
+                        html += `<div class="col-md-3"><div class="card border-success"><div class="card-body">`;
+                        html += `<h5 class="text-success">${data.results.correctAnswers}</h5>`;
+                        html += `<small>Correct (+${data.results.correctAnswers * 2} marks)</small></div></div></div>`;
+
+                        html += `<div class="col-md-3"><div class="card border-danger"><div class="card-body">`;
+                        html += `<h5 class="text-danger">${data.results.wrongAnswers}</h5>`;
+                        html += `<small>Wrong (-${(data.results.wrongAnswers * 0.25).toFixed(2)} marks)</small></div></div></div>`;
+
+                        html += `<div class="col-md-3"><div class="card border-warning"><div class="card-body">`;
+                        html += `<h5 class="text-warning">${data.results.unattempted}</h5>`;
+                        html += `<small>Unattempted (0 marks)</small></div></div></div>`;
+
+                        html += `<div class="col-md-3"><div class="card border-primary"><div class="card-body">`;
+                        html += `<h5 class="text-primary">${data.results.finalScore}/100</h5>`;
+                        html += `<small>Final Score (${data.results.percentage}%)</small></div></div></div>`;
+                        html += '</div>';
+
+                        document.getElementById('resultsViewContent').innerHTML = html;
+                    } else {
+                        document.getElementById('resultsViewContent').innerHTML = '<div class="alert alert-warning">No results found</div>';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('resultsViewContent').innerHTML = '<div class="alert alert-danger">Error loading results</div>';
+                });
+
+            new bootstrap.Modal(document.getElementById('viewResultsModal')).show();
+        }
+
+        // Add Results for Student
+        function addResultsForStudent(rollNo) {
+            document.getElementById('resultsRollNo').value = rollNo;
+            document.getElementById('resultsCorrectAnswers').value = '';
+            document.getElementById('resultsWrongAnswers').value = '';
+            document.getElementById('resultsUnattempted').value = '';
+            document.getElementById('addResultsModalLabel').textContent = 'Add Results for ' + rollNo;
+            new bootstrap.Modal(document.getElementById('addResultsModal')).show();
+        }
+
+        // Edit Results for Student
+        function editResultsForStudent(rollNo) {
+            // Fetch current results
+            fetch('/admin/students/' + rollNo + '/results')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.results) {
+                        document.getElementById('resultsRollNo').value = rollNo;
+                        document.getElementById('resultsCorrectAnswers').value = data.results.correctAnswers;
+                        document.getElementById('resultsWrongAnswers').value = data.results.wrongAnswers;
+                        document.getElementById('resultsUnattempted').value = data.results.unattempted;
+                        document.getElementById('addResultsModalLabel').textContent = 'Edit Results for ' + rollNo;
+                        new bootstrap.Modal(document.getElementById('addResultsModal')).show();
+                    } else {
+                        showAlert('danger', 'No results found to edit');
+                    }
+                })
+                .catch(error => {
+                    showAlert('danger', 'Error loading results for editing');
+                });
+        }
+
+        // Delete Results for Student
+        function deleteResults(rollNo) {
+            if (confirm('Are you sure you want to delete results for student ' + rollNo + '?')) {
+                fetch('/admin/students/' + rollNo + '/results', {
+                    method: 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+
+                            // Update the UI immediately instead of reloading
+                            const row = document.getElementById('student-' + rollNo);
+                            if (row) {
+                                const resultsCell = row.cells[6]; // Results column (0-indexed)
+                                resultsCell.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-warning me-2">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                                <button class="btn btn-outline-success btn-sm" 
+                                        onclick="addResultsForStudent('${rollNo}')"
+                                        title="Add Results">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        `;
+                            }
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'Error deleting results');
+                    });
+            }
+        }
+
+        // Update Results Preview
+        function updateResultsPreview() {
+            const correct = parseInt(document.getElementById('resultsCorrectAnswers').value) || 0;
+            const wrong = parseInt(document.getElementById('resultsWrongAnswers').value) || 0;
+            const unattempted = parseInt(document.getElementById('resultsUnattempted').value) || 0;
+
+            const total = correct + wrong + unattempted;
+            const finalScore = (correct * 2) - (wrong * 0.25);
+            const percentage = Math.max(0, (finalScore / 100) * 100);
+
+            document.getElementById('previewScore').textContent = finalScore.toFixed(2) + '/100';
+            document.getElementById('previewPercentage').textContent = percentage.toFixed(1) + '%';
+            document.getElementById('previewCalculation').textContent =
+                `Calculation: (${correct} × 2) - (${wrong} × 0.25) = ${finalScore.toFixed(2)} | Total: ${total}/50`;
+
+            // Validate total
+            if (total !== 50) {
+                document.getElementById('previewCalculation').innerHTML +=
+                    ' <span class="text-danger">⚠️ Total must equal 50</span>';
+            }
+        }
+
+
+
+        // Form submissions for individual operations
+        const editStudentForm = document.getElementById('editStudentForm');
+        if (editStudentForm) {
+            editStudentForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const rollNo = formData.get('rollNo');
+
+                fetch('/admin/students/' + rollNo, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: formData.get('name'),
+                        dob: formData.get('dob'),
+                        mobile: formData.get('mobile'),
+                        postApplied: formData.get('postApplied')
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+                            bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
+                            location.reload(); // Refresh to show updated data
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        showAlert('danger', 'Error updating student');
+                    });
+            });
+        }
+
+        const uploadOMRForm = document.getElementById('uploadOMRForm');
+        if (uploadOMRForm) {
+            uploadOMRForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const rollNo = formData.get('rollNo');
+
+                fetch('/admin/omr/single', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+                            bootstrap.Modal.getInstance(document.getElementById('uploadOMRModal')).hide();
+
+                            // Update the OMR cell in the table dynamically
+                            const row = document.getElementById('student-' + rollNo);
+                            if (row) {
+                                const omrCell = row.cells[5]; // OMR column (0-indexed)
+                                // Get the uploaded file name to construct the URL
+                                const fileInput = document.getElementById('omrFile');
+                                const fileName = fileInput.files[0].name;
+                                const extension = fileName.substring(fileName.lastIndexOf('.'));
+                                const rollNo = document.getElementById('omrRollNo').value;
+                                const omrUrl = `/uploads/omr/omr_${rollNo}${extension}`;
+
+                                omrCell.innerHTML = `
+                        <div class="d-flex align-items-center flex-wrap">
+                            <span class="badge bg-success me-2 mb-1">
+                                <i class="fas fa-check me-1"></i>Uploaded
+                            </span>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-primary" 
+                                        onclick="viewOMR('${omrUrl}', '${rollNo}')"
+                                        title="View OMR">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-warning" 
+                                        onclick="uploadOMRForStudent('${rollNo}')"
+                                        title="Replace OMR">
+                                    <i class="fas fa-upload"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" 
+                                        onclick="deleteOMR('${rollNo}')"
+                                        title="Delete OMR">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                            }
+
+                            // Reset the form
+                            this.reset();
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        showAlert('danger', 'Error uploading OMR');
+                    });
+            });
+        }
+
+        const addResultsForm = document.getElementById('addResultsForm');
+        if (addResultsForm) {
+            addResultsForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const rollNo = formData.get('rollNo');
+                const correctAnswers = parseInt(formData.get('correctAnswers')) || 0;
+                const wrongAnswers = parseInt(formData.get('wrongAnswers')) || 0;
+                const unattempted = parseInt(formData.get('unattempted')) || 0;
+
+                // Validate total equals 50
+                if (correctAnswers + wrongAnswers + unattempted !== 50) {
+                    showAlert('danger', 'Total answers must equal 50 questions');
+                    return;
+                }
+
+                // Determine if this is an add or edit operation
+                const isEdit = document.getElementById('addResultsModalLabel').textContent.includes('Edit');
+                const url = isEdit ? `/admin/students/${rollNo}/results` : '/admin/results/single';
+                const method = isEdit ? 'PUT' : 'POST';
+
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        rollNo: rollNo,
+                        correctAnswers: correctAnswers,
+                        wrongAnswers: wrongAnswers,
+                        unattempted: unattempted
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+                            bootstrap.Modal.getInstance(document.getElementById('addResultsModal')).hide();
+                            location.reload(); // Refresh to show updated data
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'Error saving results');
+                    });
+            });
+        }
+
+        // Auto-calculate total score
+        const subjectsContainer = document.getElementById('subjectsContainer');
+        if (subjectsContainer) {
+            subjectsContainer.addEventListener('input', function (e) {
+                if (e.target.name === 'subjectMark[]') {
+                    const markInputs = document.querySelectorAll('input[name="subjectMark[]"]');
+                    let total = 0;
+                    markInputs.forEach(input => {
+                        if (input.value) {
+                            total += parseInt(input.value);
+                        }
+                    });
+                    document.getElementById('totalScore').value = total;
+                }
+            });
+        }
+
+        // Student search functionality
+        const studentSearch = document.getElementById('studentSearch');
+        if (studentSearch) {
+            studentSearch.addEventListener('keyup', function () {
+                const searchTerm = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#students tbody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
