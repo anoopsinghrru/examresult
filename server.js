@@ -26,8 +26,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve uploaded files statically (excluding sensitive OMR files)
+app.use('/uploads/answer-keys', express.static(path.join(__dirname, 'uploads/answer-keys')));
+app.use('/uploads/temp', express.static(path.join(__dirname, 'uploads/temp')));
 
 // Session configuration
 app.use(session({

@@ -748,6 +748,37 @@ router.put('/answer-key/publish-all', requireAuth, async (req, res) => {
   }
 });
 
+// Secure OMR access for admins
+router.get('/secure/omr/:rollNo', requireAuth, async (req, res) => {
+  try {
+    const rollNo = req.params.rollNo.toUpperCase();
+    
+    // Find the student to get their OMR file path
+    const student = await Student.findOne({ rollNo });
+    if (!student || !student.omrImageUrl) {
+      return res.status(404).json({ error: 'OMR image not found' });
+    }
+    
+    // Construct file path
+    const filePath = path.join(__dirname, '..', student.omrImageUrl.replace(/^\//, ''));
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'OMR file not found on server' });
+    }
+    
+    // Log admin access for audit
+    console.log(`Admin OMR access: ${rollNo} by admin ${req.session.adminId} at ${new Date().toISOString()}`);
+    
+    // Serve the file
+    res.sendFile(filePath);
+    
+  } catch (error) {
+    console.error('Admin OMR access error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Delete answer key
 router.delete('/answer-key/delete', requireAuth, async (req, res) => {
   try {
