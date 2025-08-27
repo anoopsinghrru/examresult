@@ -13,7 +13,7 @@ const AnswerKey = require('../models/AnswerKey');
 const Config = require('../models/Config');
 const { requireAuth, redirectIfAuth } = require('../middleware/auth');
 const { validateAdminLogin, validateStudent, handleValidationErrors } = require('../middleware/validate');
-const { calculateResults, validateAnswerCounts, getScoreBreakdown } = require('../utils/scoreCalculator');
+const { createResults, validateResultData, getScoreBreakdown } = require('../utils/scoreCalculator');
 
 
 
@@ -357,7 +357,7 @@ router.get('/students/:rollNo/results', requireAuth, async (req, res) => {
 // Update results for single student
 router.put('/students/:rollNo/results', requireAuth, async (req, res) => {
   try {
-    const { correctAnswers, wrongAnswers, unattempted } = req.body;
+    const { correctAnswers, wrongAnswers, unattempted, finalScore, percentage } = req.body;
     const rollNo = req.params.rollNo.toUpperCase();
     
     const student = await Student.findOne({ rollNo });
@@ -365,17 +365,19 @@ router.put('/students/:rollNo/results', requireAuth, async (req, res) => {
       return res.json({ success: false, message: 'Student not found' });
     }
     
-    // Validate answer counts
+    // Validate input data
     const correct = parseInt(correctAnswers) || 0;
     const wrong = parseInt(wrongAnswers) || 0;
     const unatt = parseInt(unattempted) || 0;
+    const score = parseFloat(finalScore);
+    const percent = percentage ? parseFloat(percentage) : null;
     
-    if (!validateAnswerCounts(correct, wrong, unatt)) {
-      return res.json({ success: false, message: 'Answer counts must total 50 questions' });
+    if (!validateResultData(correct, wrong, unatt, score)) {
+      return res.json({ success: false, message: 'Invalid data: Answer counts must total 50 questions and final score is required' });
     }
     
-    // Calculate results using utility function
-    const results = calculateResults(correct, wrong, unatt);
+    // Create results using utility function
+    const results = createResults(correct, wrong, unatt, score, percent);
     student.results = results;
     
     await student.save();
@@ -789,24 +791,26 @@ router.delete('/answer-key/delete', requireAuth, async (req, res) => {
 // Add results for single student
 router.post('/results/single', requireAuth, async (req, res) => {
   try {
-    const { rollNo, correctAnswers, wrongAnswers, unattempted } = req.body;
+    const { rollNo, correctAnswers, wrongAnswers, unattempted, finalScore, percentage } = req.body;
     
     const student = await Student.findOne({ rollNo: rollNo.toUpperCase() });
     if (!student) {
       return res.json({ success: false, message: 'Student not found' });
     }
     
-    // Validate answer counts
+    // Validate input data
     const correct = parseInt(correctAnswers) || 0;
     const wrong = parseInt(wrongAnswers) || 0;
     const unatt = parseInt(unattempted) || 0;
+    const score = parseFloat(finalScore);
+    const percent = percentage ? parseFloat(percentage) : null;
     
-    if (!validateAnswerCounts(correct, wrong, unatt)) {
-      return res.json({ success: false, message: 'Answer counts must total 50 questions' });
+    if (!validateResultData(correct, wrong, unatt, score)) {
+      return res.json({ success: false, message: 'Invalid data: Answer counts must total 50 questions and final score is required' });
     }
     
-    // Calculate results using utility function
-    const results = calculateResults(correct, wrong, unatt);
+    // Create results using utility function
+    const results = createResults(correct, wrong, unatt, score, percent);
     student.results = results;
     
     await student.save();
@@ -851,20 +855,22 @@ router.post('/results/bulk', requireAuth, upload.single('excelFile'), async (req
           continue;
         }
         
-        // Extract answer counts from Excel
+        // Extract data from Excel (including final score and percentage)
         const correctAnswers = parseInt(row.correctAnswers) || 0;
         const wrongAnswers = parseInt(row.wrongAnswers) || 0;
         const unattempted = parseInt(row.unattempted) || 0;
+        const finalScore = parseFloat(row.finalScore);
+        const percentage = row.percentage ? parseFloat(row.percentage) : null;
         
-        // Validate answer counts
-        if (!validateAnswerCounts(correctAnswers, wrongAnswers, unattempted)) {
-          errors.push(`${rollNumber}: Answer counts must total 50 questions (got ${correctAnswers + wrongAnswers + unattempted})`);
+        // Validate required data
+        if (!validateResultData(correctAnswers, wrongAnswers, unattempted, finalScore)) {
+          errors.push(`${rollNumber}: Invalid data - Answer counts must total 50 questions and final score is required (got ${correctAnswers + wrongAnswers + unattempted} answers, finalScore: ${finalScore})`);
           errorCount++;
           continue;
         }
         
-        // Calculate results using utility function
-        const results = calculateResults(correctAnswers, wrongAnswers, unattempted);
+        // Create results using utility function (no calculations)
+        const results = createResults(correctAnswers, wrongAnswers, unattempted, finalScore, percentage);
         student.results = results;
         
         await student.save();

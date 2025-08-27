@@ -48,10 +48,12 @@ const studentSchema = new mongoose.Schema({
       type: Number
     },
     finalScore: {
-      type: Number
+      type: Number,
+      required: function() { return this.results && (this.results.correctAnswers !== undefined || this.results.wrongAnswers !== undefined); }
     },
     totalQuestions: {
-      type: Number
+      type: Number,
+      default: 50
     },
     percentage: {
       type: Number

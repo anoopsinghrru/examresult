@@ -4,7 +4,7 @@ const Student = require('../models/Student');
 const AnswerKey = require('../models/AnswerKey');
 const Config = require('../models/Config');
 const { validateStudentAuth, handleValidationErrors } = require('../middleware/validate');
-const { getScoreBreakdown, calculateGrade } = require('../utils/scoreCalculator');
+const { getScoreBreakdown } = require('../utils/scoreCalculator');
 
 // Home page - Student authentication form
 router.get('/', (req, res) => {
@@ -25,7 +25,7 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
     
     if (!student) {
       console.log('Student not found:', rollNo?.toUpperCase());
-      req.session.errors = [{ msg: 'Invalid roll number. Please check and try again.' }];
+      req.session.errors = [{ msg: 'Please check your details and try again.' }];
       return res.redirect('/');
     }
     
@@ -46,7 +46,7 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
     
     if (!isAuthenticated) {
       console.log('Authentication failed for student:', rollNo?.toUpperCase());
-      req.session.errors = [{ msg: 'Authentication failed. Please check your details and try again.' }];
+      req.session.errors = [{ msg: 'Please check your details and try again.' }];
       return res.redirect('/');
     }
     
@@ -70,12 +70,10 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
     const isOmrPublic = omrPublicConfig ? omrPublicConfig.value : false;
     const isResultsPublic = resultsPublicConfig ? resultsPublicConfig.value : false;
     
-    // Get score breakdown and grade if results exist
+    // Get score breakdown if results exist
     let scoreBreakdown = null;
-    let grade = null;
     if (hasResults) {
       scoreBreakdown = getScoreBreakdown(student.results);
-      grade = calculateGrade(student.results.percentage);
     }
     
     console.log('Rendering result page:', { hasOMR, hasResults, isOmrPublic, isResultsPublic });
@@ -86,8 +84,7 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
       isResultsPublic,
       hasOMR,
       hasResults,
-      scoreBreakdown,
-      grade
+      scoreBreakdown
     });
     
   } catch (error) {

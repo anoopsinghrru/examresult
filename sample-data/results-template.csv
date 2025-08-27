@@ -1,7 +1,7 @@
-rollNo,correctAnswers,wrongAnswers,unattempted
-A001,35,10,5
-A002,40,8,2
-A003,30,15,5
-A004,42,6,2
-A005,38,9,3
-A006,25,20,5
+rollNo,correctAnswers,wrongAnswers,unattempted,finalScore,percentage
+A001,35,10,5,67.5,67.5
+A002,40,8,2,78.0,78.0
+A003,30,15,5,56.25,56.25
+A004,42,6,2,82.5,82.5
+A005,38,9,3,73.75,73.75
+A006,25,20,5,45.0,45.0

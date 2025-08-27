@@ -546,7 +546,7 @@
                                                     <input type="file" class="form-control" id="resultsExcel"
                                                         name="excelFile" accept=".xlsx,.xls" required>
                                                     <div class="form-text">Excel should have columns: rollNo,
-                                                        correctAnswers, wrongAnswers, unattempted</div>
+                                                        correctAnswers, wrongAnswers, unattempted, finalScore, percentage (optional)</div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <button type="submit" class="btn btn-success">
@@ -868,10 +868,7 @@
                                             <div class="alert alert-info">
                                                 <i class="fas fa-info-circle me-2"></i>
                                                 <strong>50 Questions Total:</strong> Enter the count of correct, wrong,
-                                                and unattempted answers.
-                                                The system will automatically calculate the final score using the
-                                                formula:
-                                                <code>(Correct × 2) - (Wrong × 0.25)</code>
+                                                and unattempted answers along with the final score and percentage.
                                             </div>
 
                                             <div class="row">
@@ -883,8 +880,7 @@
                                                         </label>
                                                         <input type="number" class="form-control"
                                                             id="resultsCorrectAnswers" name="correctAnswers" min="0"
-                                                            max="50" required onchange="updateResultsPreview()">
-                                                        <div class="form-text">+2 marks each</div>
+                                                            max="50" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -894,8 +890,7 @@
                                                         </label>
                                                         <input type="number" class="form-control"
                                                             id="resultsWrongAnswers" name="wrongAnswers" min="0"
-                                                            max="50" required onchange="updateResultsPreview()">
-                                                        <div class="form-text">-0.25 marks each</div>
+                                                            max="50" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -905,32 +900,35 @@
                                                         </label>
                                                         <input type="number" class="form-control"
                                                             id="resultsUnattempted" name="unattempted" min="0" max="50"
-                                                            required onchange="updateResultsPreview()">
-                                                        <div class="form-text">0 marks each</div>
+                                                            required>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Score Preview -->
-                                            <div class="card bg-light">
-                                                <div class="card-body">
-                                                    <h6 class="card-title">Score Preview</h6>
-                                                    <div class="row text-center">
-                                                        <div class="col-6">
-                                                            <div class="h5 mb-0" id="previewScore">0/100</div>
-                                                            <small class="text-muted">Final Score</small>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <div class="h5 mb-0" id="previewPercentage">0%</div>
-                                                            <small class="text-muted">Percentage</small>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mt-2">
-                                                        <small class="text-muted" id="previewCalculation">
-                                                            Calculation: (0 × 2) - (0 × 0.25) = 0
-                                                        </small>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="resultsFinalScore" class="form-label">
+                                                            <i class="fas fa-trophy text-primary me-1"></i>Final Score
+                                                        </label>
+                                                        <input type="number" class="form-control"
+                                                            id="resultsFinalScore" name="finalScore" step="0.01" required>
+                                                        <div class="form-text">Total marks obtained</div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="resultsPercentage" class="form-label">
+                                                            <i class="fas fa-percent text-info me-1"></i>Percentage
+                                                        </label>
+                                                        <input type="number" class="form-control"
+                                                            id="resultsPercentage" name="percentage" step="0.01" min="0" max="100">
+                                                        <div class="form-text">Optional - will be calculated if not provided</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -989,8 +987,6 @@
     <script>
         // Initialize UI state on page load
         document.addEventListener('DOMContentLoaded', function () {
-            console.log('Dashboard loaded - OMR Public:', <%= isOmrPublic %>, 'Results Public:', <%= isResultsPublic %>);
-
             // Ensure all UI elements are synchronized with server state
             const isOmrPublic = <%= isOmrPublic %>;
             const isResultsPublic = <%= isResultsPublic %>;
@@ -998,8 +994,6 @@
             // Force update all UI elements to match server state
             updateOMRStatus(isOmrPublic);
             updateResultsStatus(isResultsPublic);
-
-            console.log('UI synchronized with server state');
         });
     </script>
     <script>
@@ -1028,7 +1022,6 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
                         showAlert('danger', 'Error updating OMR public status');
                         this.checked = !isPublic; // Revert toggle
                     });
@@ -1060,7 +1053,6 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
                         showAlert('danger', 'Error updating Results public status');
                         this.checked = !isPublic; // Revert toggle
                     });
@@ -1091,7 +1083,6 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
                         showAlert('danger', 'Error deleting student');
                     });
             }
@@ -1129,7 +1120,6 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
                         showAlert('danger', 'Error deleting OMR sheet');
                     });
             }
@@ -1137,8 +1127,6 @@
 
         // Toggle Answer Key Publication
         function toggleAnswerKeyPublication(postType, publish) {
-            console.log('Toggling answer key:', { postType, publish, type: typeof publish });
-
             fetch('/admin/answer-key/publish', {
                 method: 'PUT',
                 headers: {
@@ -1147,11 +1135,9 @@
                 body: JSON.stringify({ postType: postType, isPublished: publish })
             })
                 .then(response => {
-                    console.log('Response status:', response.status);
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Response data:', data);
                     if (data.success) {
                         showAlert('success', data.message);
                         // Reload page to update all UI elements
@@ -1163,7 +1149,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     showAlert('danger', 'Error updating answer key publication status: ' + error.message);
                 });
         }
@@ -1197,7 +1182,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     showAlert('danger', 'Error updating answer key publication status');
                 });
         }
@@ -1224,11 +1208,9 @@
                 body: JSON.stringify({ postType: postType })
             })
                 .then(response => {
-                    console.log('Delete response status:', response.status);
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Delete response data:', data);
                     if (data.success) {
                         showAlert('success', data.message);
                         // Reload page to update all UI elements
@@ -1240,7 +1222,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     showAlert('danger', 'Error deleting answer key: ' + error.message);
                 });
         }
@@ -1306,7 +1287,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     showAlert('danger', 'Error updating OMR public status');
                 });
         }
@@ -1331,14 +1311,12 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     showAlert('danger', 'Error updating Results public status');
                 });
         }
 
         // Update OMR Status UI Elements
         function updateOMRStatus(isPublic) {
-            console.log('Updating OMR status to:', isPublic);
 
             // Update status overview card - find by checking for OMR Status text
             const statusCards = document.querySelectorAll('.col-md-3');
@@ -1395,7 +1373,6 @@
 
         // Update Results Status UI Elements
         function updateResultsStatus(isPublic) {
-            console.log('Updating Results status to:', isPublic);
 
             // Update status overview card - find by checking for Results Status text
             const statusCards = document.querySelectorAll('.col-md-3');
@@ -1516,7 +1493,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching student data:', error);
                     showAlert('danger', 'Error loading student data');
                 });
         }
@@ -1609,6 +1585,8 @@
             document.getElementById('resultsCorrectAnswers').value = '';
             document.getElementById('resultsWrongAnswers').value = '';
             document.getElementById('resultsUnattempted').value = '';
+            document.getElementById('resultsFinalScore').value = '';
+            document.getElementById('resultsPercentage').value = '';
             document.getElementById('addResultsModalLabel').textContent = 'Add Results for ' + rollNo;
             new bootstrap.Modal(document.getElementById('addResultsModal')).show();
         }
@@ -1624,6 +1602,8 @@
                         document.getElementById('resultsCorrectAnswers').value = data.results.correctAnswers;
                         document.getElementById('resultsWrongAnswers').value = data.results.wrongAnswers;
                         document.getElementById('resultsUnattempted').value = data.results.unattempted;
+                        document.getElementById('resultsFinalScore').value = data.results.finalScore;
+                        document.getElementById('resultsPercentage').value = data.results.percentage || '';
                         document.getElementById('addResultsModalLabel').textContent = 'Edit Results for ' + rollNo;
                         new bootstrap.Modal(document.getElementById('addResultsModal')).show();
                     } else {
@@ -1668,33 +1648,12 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
                         showAlert('danger', 'Error deleting results');
                     });
             }
         }
 
-        // Update Results Preview
-        function updateResultsPreview() {
-            const correct = parseInt(document.getElementById('resultsCorrectAnswers').value) || 0;
-            const wrong = parseInt(document.getElementById('resultsWrongAnswers').value) || 0;
-            const unattempted = parseInt(document.getElementById('resultsUnattempted').value) || 0;
 
-            const total = correct + wrong + unattempted;
-            const finalScore = (correct * 2) - (wrong * 0.25);
-            const percentage = Math.max(0, (finalScore / 100) * 100);
-
-            document.getElementById('previewScore').textContent = finalScore.toFixed(2) + '/100';
-            document.getElementById('previewPercentage').textContent = percentage.toFixed(1) + '%';
-            document.getElementById('previewCalculation').textContent =
-                `Calculation: (${correct} × 2) - (${wrong} × 0.25) = ${finalScore.toFixed(2)} | Total: ${total}/50`;
-
-            // Validate total
-            if (total !== 50) {
-                document.getElementById('previewCalculation').innerHTML +=
-                    ' <span class="text-danger">⚠️ Total must equal 50</span>';
-            }
-        }
 
 
 
@@ -1809,10 +1768,18 @@
                 const correctAnswers = parseInt(formData.get('correctAnswers')) || 0;
                 const wrongAnswers = parseInt(formData.get('wrongAnswers')) || 0;
                 const unattempted = parseInt(formData.get('unattempted')) || 0;
+                const finalScore = parseFloat(formData.get('finalScore'));
+                const percentage = formData.get('percentage') ? parseFloat(formData.get('percentage')) : null;
 
                 // Validate total equals 50
                 if (correctAnswers + wrongAnswers + unattempted !== 50) {
                     showAlert('danger', 'Total answers must equal 50 questions');
+                    return;
+                }
+
+                // Validate final score is provided
+                if (isNaN(finalScore)) {
+                    showAlert('danger', 'Final score is required');
                     return;
                 }
 
@@ -1821,17 +1788,24 @@
                 const url = isEdit ? `/admin/students/${rollNo}/results` : '/admin/results/single';
                 const method = isEdit ? 'PUT' : 'POST';
 
+                const requestBody = {
+                    rollNo: rollNo,
+                    correctAnswers: correctAnswers,
+                    wrongAnswers: wrongAnswers,
+                    unattempted: unattempted,
+                    finalScore: finalScore
+                };
+
+                if (percentage !== null) {
+                    requestBody.percentage = percentage;
+                }
+
                 fetch(url, {
                     method: method,
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        rollNo: rollNo,
-                        correctAnswers: correctAnswers,
-                        wrongAnswers: wrongAnswers,
-                        unattempted: unattempted
-                    })
+                    body: JSON.stringify(requestBody)
                 })
                     .then(response => response.json())
                     .then(data => {
@@ -1844,7 +1818,6 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
                         showAlert('danger', 'Error saving results');
                     });
             });

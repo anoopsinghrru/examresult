@@ -1,87 +1,81 @@
 /**
  * Score Calculator Utility
- * Handles scoring logic for the new exam system
+ * Handles result processing for the exam system
  * 
- * Scoring Rules:
- * - Correct Answer: +2 marks
- * - Wrong Answer: -0.25 marks (1/4 deduction)
- * - Unattempted: 0 marks
- * - Total Questions: 50
- * - Maximum Score: 100 (50 × 2)
- * - Minimum Score: -12.5 (50 × -0.25)
+ * Note: All calculations (final score, percentage) are now provided directly
+ * from Excel uploads. This utility only validates and formats the data.
  */
 
 /**
- * Calculate final results based on correct, wrong, and unattempted counts
+ * Create results object from provided data (no calculations)
  * @param {number} correctCount - Number of correct answers
  * @param {number} wrongCount - Number of wrong answers  
  * @param {number} unattemptedCount - Number of unattempted questions
+ * @param {number} finalScore - Final score (provided directly)
+ * @param {number} percentage - Percentage (provided directly, optional)
  * @returns {object} Complete results object
  */
-function calculateResults(correctCount, wrongCount, unattemptedCount) {
+function createResults(correctCount, wrongCount, unattemptedCount, finalScore, percentage = null) {
   // Validate inputs
   if (correctCount < 0 || wrongCount < 0 || unattemptedCount < 0) {
     throw new Error('Answer counts cannot be negative');
   }
-  
+
+  if (finalScore === undefined || finalScore === null) {
+    throw new Error('Final score is required');
+  }
+
   const totalQuestions = 50;
   const totalAnswered = correctCount + wrongCount + unattemptedCount;
-  
+
   if (totalAnswered !== totalQuestions) {
     throw new Error(`Total answers (${totalAnswered}) must equal ${totalQuestions}`);
   }
-  
-  // Calculate final score
-  const correctMarks = correctCount * 2;
-  const wrongMarks = wrongCount * 0.25;
-  const finalScore = correctMarks - wrongMarks;
-  
-  // Calculate percentage (based on maximum possible score of 100)
-  const percentage = Math.max(0, (finalScore / 100) * 100);
-  
+
+  // If percentage not provided, calculate it based on finalScore out of 100
+  const calculatedPercentage = percentage !== null ? percentage : Math.max(0, (finalScore / 100) * 100);
+
   return {
     correctAnswers: correctCount,
     wrongAnswers: wrongCount,
     unattempted: unattemptedCount,
     finalScore: Math.round(finalScore * 100) / 100, // Round to 2 decimal places
     totalQuestions: totalQuestions,
-    percentage: Math.round(percentage * 100) / 100 // Round to 2 decimal places
+    percentage: Math.round(calculatedPercentage * 100) / 100 // Round to 2 decimal places
   };
 }
 
 /**
- * Validate answer counts before processing
+ * Validate answer counts and final score before processing
  * @param {number} correct - Correct answers count
  * @param {number} wrong - Wrong answers count
  * @param {number} unattempted - Unattempted count
+ * @param {number} finalScore - Final score (required)
  * @returns {boolean} True if valid
  */
-function validateAnswerCounts(correct, wrong, unattempted) {
+function validateResultData(correct, wrong, unattempted, finalScore) {
   const total = correct + wrong + unattempted;
-  return total === 50 && correct >= 0 && wrong >= 0 && unattempted >= 0;
+  return total === 50 && correct >= 0 && wrong >= 0 && unattempted >= 0 && finalScore !== undefined && finalScore !== null;
 }
 
 /**
- * Get score breakdown for display
- * @param {object} results - Results object from calculateResults
+ * Get score breakdown for display (no mark calculations)
+ * @param {object} results - Results object
  * @returns {object} Formatted breakdown for display
  */
 function getScoreBreakdown(results) {
   return {
     correct: {
       count: results.correctAnswers,
-      marks: results.correctAnswers * 2,
-      label: `+${results.correctAnswers * 2} marks`
+      label: `${results.correctAnswers} correct`
     },
     wrong: {
       count: results.wrongAnswers,
-      marks: results.wrongAnswers * 0.25,
-      label: `-${results.wrongAnswers * 0.25} marks`
+      label: `${results.wrongAnswers} wrong`
     },
     unattempted: {
       count: results.unattempted,
-      marks: 0,
-      label: '0 marks'
+      label: `${results.unattempted} unattempted`
     },
     final: {
       score: results.finalScore,
@@ -91,25 +85,8 @@ function getScoreBreakdown(results) {
   };
 }
 
-/**
- * Calculate grade based on percentage
- * @param {number} percentage - Percentage score
- * @returns {string} Grade letter
- */
-function calculateGrade(percentage) {
-  if (percentage >= 90) return 'A+';
-  if (percentage >= 80) return 'A';
-  if (percentage >= 70) return 'B+';
-  if (percentage >= 60) return 'B';
-  if (percentage >= 50) return 'C+';
-  if (percentage >= 40) return 'C';
-  if (percentage >= 33) return 'D';
-  return 'F';
-}
-
 module.exports = {
-  calculateResults,
-  validateAnswerCounts,
-  getScoreBreakdown,
-  calculateGrade
+  createResults,
+  validateResultData,
+  getScoreBreakdown
 };

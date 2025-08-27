@@ -92,7 +92,6 @@
                                                 <%= student.results.correctAnswers %>
                                             </div>
                                             <div class="text-success fw-semibold">Correct Answers</div>
-                                            <small class="text-muted">+<%= student.results.correctAnswers * 2 %> marks</small>
                                         </div>
                                     </div>
                                 </div>
@@ -103,7 +102,6 @@
                                                 <%= student.results.wrongAnswers %>
                                             </div>
                                             <div class="text-danger fw-semibold">Wrong Answers</div>
-                                            <small class="text-muted">-<%= (student.results.wrongAnswers * 0.25).toFixed(2) %> marks</small>
                                         </div>
                                     </div>
                                 </div>
@@ -114,7 +112,6 @@
                                                 <%= student.results.unattempted %>
                                             </div>
                                             <div class="text-warning fw-semibold">Unattempted</div>
-                                            <small class="text-muted">0 marks</small>
                                         </div>
                                     </div>
                                 </div>
