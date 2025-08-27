@@ -3,27 +3,123 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
 
-// Trust proxy for Render
+// Trust proxy for production
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
-// Rate limiting
+// 🛡️ HELMET SECURITY HEADERS - XSS & Clickjacking Protection
+app.use(helmet({
+  // Content Security Policy - Prevents XSS attacks
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: [
+        "'self'", 
+        "'unsafe-inline'", // Required for Bootstrap inline styles
+        "https://cdn.jsdelivr.net",
+        "https://cdnjs.cloudflare.com"
+      ],
+      scriptSrc: [
+        "'self'", 
+        "'unsafe-inline'", // Required for inline scripts in EJS templates
+        "https://cdn.jsdelivr.net",
+        "https://cdnjs.cloudflare.com"
+      ],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: [
+        "'self'", 
+        "https://cdn.jsdelivr.net",
+        "https://cdnjs.cloudflare.com"
+      ],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"], // Prevents clickjacking
+      objectSrc: ["'none'"], // Prevents object/embed attacks
+      mediaSrc: ["'self'"],
+      formAction: ["'self'"] // Prevents form hijacking
+    }
+  },
+  // Cross-Origin Embedder Policy (disabled for file uploads)
+  crossOriginEmbedderPolicy: false,
+  // HTTP Strict Transport Security - Forces HTTPS
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  },
+  // X-Frame-Options - Prevents clickjacking
+  frameguard: { action: 'deny' },
+  // X-Content-Type-Options - Prevents MIME sniffing
+  noSniff: true,
+  // X-XSS-Protection - XSS filter
+  xssFilter: true,
+  // Referrer Policy - Controls referrer information
+  referrerPolicy: { policy: 'same-origin' }
+}));
+
+// 🛡️ MONGODB SANITIZATION - NoSQL Injection Prevention
+app.use(mongoSanitize({
+  replaceWith: '_', // Replace dangerous characters with underscore
+  onSanitize: ({ req, key }) => {
+    // Log sanitization attempts for security monitoring
+    console.warn(`🚨 NoSQL Injection Attempt Blocked:`, {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      url: req.originalUrl,
+      sanitizedKey: key,
+      timestamp: new Date().toISOString()
+    });
+  }
+}));
+
+// Enhanced rate limiting with different limits for production
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
+  max: process.env.NODE_ENV === 'production' ? 50 : 100, // Stricter in production
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+    retryAfter: '15 minutes'
+  },
+  standardHeaders: true, // Return rate limit info in headers
+  legacyHeaders: false, // Disable X-RateLimit-* headers
+  // Skip successful requests to reduce false positives
+  skipSuccessfulRequests: true,
+  // Custom key generator for better IP tracking
+  keyGenerator: (req) => {
+    return req.ip;
+  }
 });
 
-// Middleware
 app.use(limiter);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body parsing with size limits to prevent DoS attacks
+app.use(express.json({ 
+  limit: '10mb',
+  // Additional security for JSON parsing
+  verify: (req, res, buf) => {
+    // Log large payloads for monitoring
+    if (buf.length > 1024 * 1024) { // 1MB
+      console.warn(`🚨 Large JSON payload detected:`, {
+        ip: req.ip,
+        size: buf.length,
+        url: req.originalUrl,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+}));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '10mb',
+  // Prevent parameter pollution
+  parameterLimit: 100
+}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve uploaded files statically (excluding sensitive OMR files)

@@ -1,12 +1,28 @@
 const { body, validationResult } = require('express-validator');
 
-// Validation rules for student authentication
+// 🛡️ Enhanced validation rules for student authentication with NoSQL injection prevention
 const validateStudentAuth = [
   body('rollNo')
     .notEmpty()
     .withMessage('Roll number is required')
     .trim()
-    .escape(),
+    .escape()
+    .isLength({ max: 20 })
+    .withMessage('Roll number too long')
+    .matches(/^[A-Za-z0-9\-_]+$/)
+    .withMessage('Roll number contains invalid characters')
+    .custom((value) => {
+      // Additional NoSQL injection prevention
+      const dangerousPatterns = [
+        /\$where/i, /\$ne/i, /\$gt/i, /\$lt/i, /\$in/i, /\$nin/i,
+        /\$regex/i, /\$exists/i, /\$or/i, /\$and/i, /javascript:/i
+      ];
+      
+      if (dangerousPatterns.some(pattern => pattern.test(value))) {
+        throw new Error('Invalid characters detected in roll number');
+      }
+      return true;
+    }),
   body('dob')
     .optional()
     .custom((value) => {
@@ -49,32 +65,88 @@ const validateStudentAuth = [
     })
 ];
 
-// Validation rules for admin login
+// 🛡️ Enhanced validation rules for admin login with security hardening
 const validateAdminLogin = [
   body('username')
     .notEmpty()
     .withMessage('Username is required')
     .trim()
-    .escape(),
+    .escape()
+    .isLength({ max: 50 })
+    .withMessage('Username too long')
+    .matches(/^[A-Za-z0-9_]+$/)
+    .withMessage('Username contains invalid characters')
+    .custom((value) => {
+      // Prevent NoSQL injection in username
+      const dangerousPatterns = [
+        /\$where/i, /\$ne/i, /\$gt/i, /\$lt/i, /\$in/i, /\$nin/i,
+        /\$regex/i, /\$exists/i, /\$or/i, /\$and/i, /javascript:/i,
+        /<script/i, /eval\(/i, /function\(/i
+      ];
+      
+      if (dangerousPatterns.some(pattern => pattern.test(value))) {
+        throw new Error('Invalid characters detected in username');
+      }
+      return true;
+    }),
   body('password')
     .notEmpty()
     .withMessage('Password is required')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long')
+    .isLength({ min: 6, max: 128 })
+    .withMessage('Password must be between 6-128 characters')
+    .custom((value) => {
+      // Basic password security check
+      if (value.includes('<script') || value.includes('javascript:')) {
+        throw new Error('Invalid characters in password');
+      }
+      return true;
+    })
 ];
 
-// Validation rules for adding student
+// 🛡️ Enhanced validation rules for adding student with comprehensive security
 const validateStudent = [
   body('rollNo')
     .notEmpty()
     .withMessage('Roll number is required')
     .trim()
-    .escape(),
+    .escape()
+    .isLength({ max: 20 })
+    .withMessage('Roll number too long')
+    .matches(/^[A-Za-z0-9\-_]+$/)
+    .withMessage('Roll number contains invalid characters')
+    .custom((value) => {
+      // NoSQL injection prevention
+      const dangerousPatterns = [
+        /\$where/i, /\$ne/i, /\$gt/i, /\$lt/i, /\$in/i, /\$nin/i,
+        /\$regex/i, /\$exists/i, /\$or/i, /\$and/i
+      ];
+      
+      if (dangerousPatterns.some(pattern => pattern.test(value))) {
+        throw new Error('Invalid characters detected in roll number');
+      }
+      return true;
+    }),
   body('name')
     .notEmpty()
     .withMessage('Name is required')
     .trim()
-    .escape(),
+    .escape()
+    .isLength({ max: 100 })
+    .withMessage('Name too long')
+    .matches(/^[A-Za-z\s.'-]+$/)
+    .withMessage('Name contains invalid characters')
+    .custom((value) => {
+      // XSS and injection prevention in names
+      const dangerousPatterns = [
+        /<script/i, /javascript:/i, /vbscript:/i, /onload=/i, /onerror=/i,
+        /\$where/i, /\$ne/i, /eval\(/i, /function\(/i
+      ];
+      
+      if (dangerousPatterns.some(pattern => pattern.test(value))) {
+        throw new Error('Invalid characters detected in name');
+      }
+      return true;
+    }),
   body('dob')
     .custom((value) => {
       // Validate DD/MM/YYYY format
@@ -104,15 +176,47 @@ const validateStudent = [
     .escape()
 ];
 
-// Middleware to handle validation errors
+// 🛡️ Enhanced middleware to handle validation errors with security logging
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    // Log validation failures for security monitoring
+    console.warn(`🚨 Validation Error Detected:`, {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      url: req.originalUrl,
+      method: req.method,
+      errors: errors.array().map(err => ({
+        field: err.path,
+        message: err.msg,
+        value: typeof err.value === 'string' ? err.value.substring(0, 50) : err.value
+      })),
+      timestamp: new Date().toISOString()
+    });
+    
+    // Check for potential security threats in validation errors
+    const securityThreats = errors.array().filter(error => 
+      error.msg.includes('Invalid characters') || 
+      error.msg.includes('injection') ||
+      error.msg.includes('dangerous')
+    );
+    
+    if (securityThreats.length > 0) {
+      console.error(`🚨 SECURITY THREAT DETECTED:`, {
+        ip: req.ip,
+        threats: securityThreats,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
     // For API requests, return JSON
-    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+    if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
       return res.status(400).json({
         success: false,
-        errors: errors.array()
+        errors: errors.array().map(err => ({
+          field: err.path,
+          message: err.msg
+        }))
       });
     }
     
