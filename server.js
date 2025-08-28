@@ -22,20 +22,21 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: [
-        "'self'", 
+        "'self'",
         "'unsafe-inline'", // Required for Bootstrap inline styles
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com"
       ],
       scriptSrc: [
-        "'self'", 
+        "'self'",
         "'unsafe-inline'", // Required for inline scripts in EJS templates
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com"
       ],
+      scriptSrcAttr: ["'unsafe-inline'"], // Allow inline event handlers
       imgSrc: ["'self'", "data:", "https:"],
       fontSrc: [
-        "'self'", 
+        "'self'",
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com"
       ],
@@ -99,7 +100,7 @@ const limiter = rateLimit({
 
 app.use(limiter);
 // Body parsing with size limits to prevent DoS attacks
-app.use(express.json({ 
+app.use(express.json({
   limit: '10mb',
   // Additional security for JSON parsing
   verify: (req, res, buf) => {
@@ -114,8 +115,8 @@ app.use(express.json({
     }
   }
 }));
-app.use(express.urlencoded({ 
-  extended: true, 
+app.use(express.urlencoded({
+  extended: true,
   limit: '10mb',
   // Prevent parameter pollution
   parameterLimit: 100
@@ -160,6 +161,11 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Favicon route to prevent 404 errors
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
+
 // Routes
 const publicRoutes = require('./routes/public');
 const adminRoutes = require('./routes/admin');
@@ -170,7 +176,7 @@ app.use('/admin', adminRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).render('error', { 
+  res.status(500).render('error', {
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err : {}
   });
@@ -178,7 +184,7 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).render('error', { 
+  res.status(404).render('error', {
     message: 'Page not found',
     error: {}
   });
