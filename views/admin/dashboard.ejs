@@ -326,7 +326,7 @@
                                                     placeholder="Search by roll no, name, mobile...">
                                             </div>
                                             <div class="col-md-8">
-                                                <form action="/admin/students/bulk" method="POST"
+                                                <form id="bulkStudentForm" action="/admin/students/bulk" method="POST"
                                                     enctype="multipart/form-data" class="d-flex align-items-end">
                                                     <div class="flex-grow-1 me-2">
                                                         <label for="studentExcel" class="form-label">Bulk Upload
@@ -335,8 +335,16 @@
                                                             name="excelFile" accept=".xlsx,.xls" required>
                                                         <div class="form-text">Excel: rollNo, name, dob (DD-MM-YYYY or DD/MM/YYYY),
                                                             mobile, postApplied</div>
+                                                        <!-- Progress indicator -->
+                                                        <div id="bulkStudentProgress" class="mt-2" style="display: none;">
+                                                            <div class="progress mb-2">
+                                                                <div id="bulkStudentProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                                     role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                            </div>
+                                                            <small id="bulkStudentProgressText" class="text-muted"></small>
+                                                        </div>
                                                     </div>
-                                                    <button type="submit" class="btn btn-success">
+                                                    <button type="submit" class="btn btn-success" data-original-text="<i class='fas fa-upload me-1'></i>Upload">
                                                         <i class="fas fa-upload me-1"></i>Upload
                                                     </button>
                                                 </form>
@@ -498,7 +506,7 @@
                                         </div>
 
                                         <!-- Bulk OMR Upload -->
-                                        <form action="/admin/omr/bulk" method="POST" enctype="multipart/form-data">
+                                        <form id="bulkOMRForm" action="/admin/omr/bulk" method="POST" enctype="multipart/form-data">
                                             <div class="row align-items-end">
                                                 <div class="col-md-8">
                                                     <label for="omrZip" class="form-label">Upload OMR Sheets
@@ -507,9 +515,17 @@
                                                         accept=".zip" required>
                                                     <div class="form-text">ZIP should contain image files named as
                                                         rollNo.jpg/png/jpeg</div>
+                                                    <!-- Progress indicator -->
+                                                    <div id="bulkOMRProgress" class="mt-2" style="display: none;">
+                                                        <div class="progress mb-2">
+                                                            <div id="bulkOMRProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                                                 role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                        <small id="bulkOMRProgressText" class="text-muted"></small>
+                                                    </div>
                                                 </div>
                                                 <div class="col-md-4">
-                                                    <button type="submit" class="btn btn-primary">
+                                                    <button type="submit" class="btn btn-primary" data-original-text="<i class='fas fa-upload me-1'></i>Upload OMR Sheets">
                                                         <i class="fas fa-upload me-1"></i>Upload OMR Sheets
                                                     </button>
                                                 </div>
@@ -683,7 +699,7 @@
                                                     <strong>Note:</strong> Uploading a new answer key for an existing
                                                     post will replace the current one.
                                                 </div>
-                                                <form action="/admin/answer-key" method="POST"
+                                                <form id="answerKeyForm" action="/admin/answer-key" method="POST"
                                                     enctype="multipart/form-data">
                                                     <div class="row align-items-end">
                                                         <div class="col-md-3">
@@ -704,10 +720,18 @@
                                                             <input type="file" class="form-control" id="answerKeyFile"
                                                                 name="answerKeyFile" accept=".pdf,image/*" required>
                                                             <div class="form-text">Supported: PDF, JPG, PNG</div>
+                                                            <!-- Progress indicator -->
+                                                            <div id="answerKeyProgress" class="mt-2" style="display: none;">
+                                                                <div class="progress mb-2">
+                                                                    <div id="answerKeyProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                                                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                </div>
+                                                                <small id="answerKeyProgressText" class="text-muted"></small>
+                                                            </div>
                                                         </div>
 
                                                         <div class="col-md-2">
-                                                            <button type="submit" class="btn btn-primary">
+                                                            <button type="submit" class="btn btn-primary" data-original-text="<i class='fas fa-upload me-1'></i>Upload">
                                                                 <i class="fas fa-upload me-1"></i>Upload
                                                             </button>
                                                         </div>
@@ -842,11 +866,21 @@
                                                     accept="image/*,.pdf" required>
                                                 <div class="form-text">Supported formats: JPG, PNG, PDF</div>
                                             </div>
+                                            <!-- Progress indicator -->
+                                            <div id="omrUploadProgress" class="mb-3" style="display: none;">
+                                                <div class="progress mb-2">
+                                                    <div id="omrProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small id="omrProgressText" class="text-muted"></small>
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-primary">Upload OMR</button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-upload me-1"></i>Upload OMR
+                                            </button>
                                         </div>
                                     </form>
                                 </div>

@@ -473,8 +473,57 @@ function deleteAnswerKey(postType) {
     }
 }
 
+// File input change handlers for showing file info
+function setupFileInputHandlers() {
+    const fileInputs = [
+        { id: 'studentExcel', maxSize: 10 * 1024 * 1024, types: ['.xlsx', '.xls'] }, // 10MB
+        { id: 'omrZip', maxSize: 50 * 1024 * 1024, types: ['.zip'] }, // 50MB
+        { id: 'answerKeyFile', maxSize: 10 * 1024 * 1024, types: ['.pdf', '.jpg', '.jpeg', '.png'] }, // 10MB
+        { id: 'omrFile', maxSize: 10 * 1024 * 1024, types: ['.pdf', '.jpg', '.jpeg', '.png'] } // 10MB
+    ];
+    
+    fileInputs.forEach(config => {
+        const input = document.getElementById(config.id);
+        if (input) {
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Remove existing file info
+                    const existingInfo = input.parentNode.querySelector('.file-info');
+                    if (existingInfo) existingInfo.remove();
+                    
+                    const fileInfo = document.createElement('div');
+                    fileInfo.className = 'file-info mt-1 small';
+                    
+                    // Validate file size
+                    if (file.size > config.maxSize) {
+                        fileInfo.className += ' text-danger';
+                        fileInfo.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>${file.name} (${formatFileSize(file.size)}) - File too large! Max: ${formatFileSize(config.maxSize)}`;
+                        input.value = ''; // Clear the input
+                    } else {
+                        // Validate file type
+                        const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+                        if (!config.types.includes(fileExt)) {
+                            fileInfo.className += ' text-warning';
+                            fileInfo.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>${file.name} (${formatFileSize(file.size)}) - Unsupported file type. Allowed: ${config.types.join(', ')}`;
+                            input.value = ''; // Clear the input
+                        } else {
+                            fileInfo.className += ' text-success';
+                            fileInfo.innerHTML = `<i class="fas fa-check-circle me-1"></i>${file.name} (${formatFileSize(file.size)}) - Ready to upload`;
+                        }
+                    }
+                    
+                    // Add new file info
+                    input.parentNode.appendChild(fileInfo);
+                }
+            });
+        }
+    });
+}
+
 // Initialize dashboard functionality
 document.addEventListener('DOMContentLoaded', function() {
+    setupFileInputHandlers();
     // Global cleanup function that runs periodically
     setInterval(function() {
         // Check if there are any orphaned modal backdrops
@@ -707,23 +756,89 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadOMRForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const progressContainer = document.getElementById('omrUploadProgress');
+            const progressBar = document.getElementById('omrProgressBar');
+            const progressText = document.getElementById('omrProgressText');
             
-            fetch('/admin/omr/single', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
+            // Show progress container and disable submit button
+            if (progressContainer) progressContainer.style.display = 'block';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Uploading...';
+            }
+            
+            // Create XMLHttpRequest for progress tracking
+            const xhr = new XMLHttpRequest();
+            let startTime = Date.now();
+            
+            // Track upload progress
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    const speed = e.loaded / elapsed;
+                    const remaining = (e.total - e.loaded) / speed;
+                    
+                    if (progressBar) {
+                        progressBar.style.width = percentComplete + '%';
+                        progressBar.setAttribute('aria-valuenow', percentComplete);
+                        progressBar.textContent = percentComplete + '%';
+                    }
+                    if (progressText) {
+                        const sizeText = formatFileSize(e.loaded) + ' / ' + formatFileSize(e.total);
+                        const speedText = elapsed > 1 ? ` at ${formatSpeed(speed)}` : '';
+                        const timeText = remaining > 1 && elapsed > 1 ? ` • ${formatTime(remaining)} remaining` : '';
+                        progressText.textContent = `Uploading ${sizeText}${speedText}${timeText}`;
+                    }
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while uploading OMR');
             });
+            
+            xhr.onload = function() {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        if (progressBar) {
+                            progressBar.classList.remove('progress-bar-striped', 'progress-bar-animated');
+                            progressBar.classList.add('bg-success');
+                            progressBar.style.width = '100%';
+                            progressBar.textContent = '✓ Complete';
+                        }
+                        if (progressText) progressText.textContent = '✓ Upload complete! Refreshing page...';
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        alert('Error: ' + data.message);
+                        resetUploadForm();
+                    }
+                } catch (error) {
+                    console.error('Error parsing response:', error);
+                    alert('An error occurred while uploading OMR');
+                    resetUploadForm();
+                }
+            };
+            
+            xhr.onerror = function() {
+                console.error('Upload error');
+                alert('An error occurred while uploading OMR');
+                resetUploadForm();
+            };
+            
+            function resetUploadForm() {
+                if (progressContainer) progressContainer.style.display = 'none';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Upload OMR';
+                }
+                if (progressBar) {
+                    progressBar.style.width = '0%';
+                    progressBar.setAttribute('aria-valuenow', 0);
+                    progressBar.textContent = '';
+                }
+                if (progressText) progressText.textContent = '';
+            }
+            
+            xhr.open('POST', '/admin/omr/single');
+            xhr.send(formData);
         });
     }
 
@@ -763,20 +878,164 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Handle forms with progress tracking
+    const bulkOMRForm = document.getElementById('bulkOMRForm');
+    if (bulkOMRForm) {
+        bulkOMRForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const progressContainer = document.getElementById('bulkOMRProgress');
+            const progressBar = document.getElementById('bulkOMRProgressBar');
+            const progressText = document.getElementById('bulkOMRProgressText');
+            
+            // Show progress and disable submit
+            if (progressContainer) progressContainer.style.display = 'block';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing ZIP...';
+            }
+            
+            uploadWithProgress('/admin/omr/bulk', formData, progressBar, progressText, submitBtn, 'ZIP processed successfully!');
+        });
+    }
+
+    const answerKeyForm = document.getElementById('answerKeyForm');
+    if (answerKeyForm) {
+        answerKeyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const progressContainer = document.getElementById('answerKeyProgress');
+            const progressBar = document.getElementById('answerKeyProgressBar');
+            const progressText = document.getElementById('answerKeyProgressText');
+            
+            // Show progress and disable submit
+            if (progressContainer) progressContainer.style.display = 'block';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Uploading...';
+            }
+            
+            uploadWithProgress('/admin/answer-key', formData, progressBar, progressText, submitBtn, 'Answer key uploaded successfully!');
+        });
+    }
+
+    const bulkStudentForm = document.getElementById('bulkStudentForm');
+    if (bulkStudentForm) {
+        bulkStudentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const progressContainer = document.getElementById('bulkStudentProgress');
+            const progressBar = document.getElementById('bulkStudentProgressBar');
+            const progressText = document.getElementById('bulkStudentProgressText');
+            
+            // Show progress and disable submit
+            if (progressContainer) progressContainer.style.display = 'block';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing Excel...';
+            }
+            
+            uploadWithProgress('/admin/students/bulk', formData, progressBar, progressText, submitBtn, 'Students imported successfully!');
+        });
+    }
+
+    // Generic upload with progress function
+    function uploadWithProgress(url, formData, progressBar, progressText, submitBtn, successMessage) {
+        const xhr = new XMLHttpRequest();
+        let startTime = Date.now();
+        
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const percentComplete = Math.round((e.loaded / e.total) * 100);
+                const elapsed = (Date.now() - startTime) / 1000;
+                const speed = e.loaded / elapsed;
+                const remaining = (e.total - e.loaded) / speed;
+                
+                if (progressBar) {
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.setAttribute('aria-valuenow', percentComplete);
+                    progressBar.textContent = percentComplete + '%';
+                }
+                if (progressText) {
+                    const sizeText = formatFileSize(e.loaded) + ' / ' + formatFileSize(e.total);
+                    const speedText = elapsed > 1 ? ` at ${formatSpeed(speed)}` : '';
+                    const timeText = remaining > 1 ? ` • ${formatTime(remaining)} remaining` : '';
+                    progressText.textContent = `Uploading ${sizeText}${speedText}${timeText}`;
+                }
+            }
+        });
+        
+        xhr.onload = function() {
+            if (progressBar) {
+                progressBar.classList.remove('progress-bar-striped', 'progress-bar-animated');
+                progressBar.classList.add('bg-success');
+                progressBar.style.width = '100%';
+                progressBar.textContent = '✓ Complete';
+            }
+            if (progressText) progressText.textContent = '✓ ' + successMessage + ' Refreshing page...';
+            setTimeout(() => location.reload(), 1500);
+        };
+        
+        xhr.onerror = function() {
+            console.error('Upload error');
+            alert('An error occurred during upload');
+            resetFormState(submitBtn, progressBar, progressText);
+        };
+        
+        xhr.open('POST', url);
+        xhr.send(formData);
+    }
+
+    // Helper function to format file sizes
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Helper function to format upload speed
+    function formatSpeed(bytesPerSecond) {
+        return formatFileSize(bytesPerSecond) + '/s';
+    }
+
+    // Helper function to format time
+    function formatTime(seconds) {
+        if (seconds < 60) return Math.round(seconds) + 's';
+        if (seconds < 3600) return Math.round(seconds / 60) + 'm ' + Math.round(seconds % 60) + 's';
+        return Math.round(seconds / 3600) + 'h ' + Math.round((seconds % 3600) / 60) + 'm';
+    }
+
+    function resetFormState(submitBtn, progressBar, progressText) {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            const originalText = submitBtn.dataset.originalText;
+            if (originalText) {
+                submitBtn.innerHTML = originalText;
+            } else {
+                submitBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Upload';
+            }
+        }
+        if (progressBar) {
+            progressBar.style.width = '0%';
+            progressBar.setAttribute('aria-valuenow', 0);
+            progressBar.textContent = '';
+        }
+        if (progressText) progressText.textContent = '';
+    }
+
     // Handle forms that should submit normally (not via AJAX)
-    // These forms will use their default action and method
     const normalForms = [
-        'addStudentForm', // Add student form
-        'bulkStudentForm', // Bulk student upload
-        'bulkOMRForm', // Bulk OMR upload
-        'answerKeyForm', // Answer key upload
-        'bulkResultsForm' // Bulk results upload
+        'addStudentForm' // Add student form
     ];
 
     normalForms.forEach(formId => {
         const form = document.getElementById(formId);
         if (form) {
-            // Don't prevent default for these forms - let them submit normally
             console.log(`Found form: ${formId} - allowing normal submission`);
         }
     });
