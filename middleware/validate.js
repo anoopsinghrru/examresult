@@ -48,12 +48,22 @@ const validateStudentAuth = [
     .optional()
     .custom((value) => {
       if (value) {
+        // Clean mobile number (remove any non-digits) for validation
+        const cleanMobile = value.replace(/\D/g, '');
+        
         // Validate mobile number (10 digits)
-        if (!/^\d{10}$/.test(value)) {
+        if (!/^\d{10}$/.test(cleanMobile)) {
           throw new Error('Mobile number must be exactly 10 digits');
         }
+        
+        // Update the value with cleaned version
+        return cleanMobile;
       }
       return true;
+    })
+    .customSanitizer((value) => {
+      // Clean mobile number in sanitizer as well
+      return value ? value.replace(/\D/g, '') : value;
     }),
   body()
     .custom((value, { req }) => {

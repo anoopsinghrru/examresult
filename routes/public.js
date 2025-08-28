@@ -33,7 +33,17 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
   try {
     const { rollNo, dob, mobile } = req.body;
     
-    console.log('Student authentication attempt:', { rollNo: rollNo?.toUpperCase(), hasDob: !!dob, hasMobile: !!mobile });
+    // Enhanced logging for mobile debugging
+    const userAgent = req.get('User-Agent') || '';
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    
+    console.log('Student authentication attempt:', { 
+      rollNo: rollNo?.toUpperCase(), 
+      hasDob: !!dob, 
+      hasMobile: !!mobile,
+      isMobile,
+      userAgent: userAgent.substring(0, 100)
+    });
     
     // Find student by roll number
     const student = await Student.findOne({ rollNo: rollNo.toUpperCase() });
@@ -55,8 +65,17 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
       isAuthenticated = inputDate.toDateString() === studentDob.toDateString();
       console.log('DOB authentication:', { inputDate: inputDate.toDateString(), studentDob: studentDob.toDateString(), isAuthenticated });
     } else if (mobile) {
-      isAuthenticated = student.mobile === mobile;
-      console.log('Mobile authentication:', { inputMobile: mobile, studentMobile: student.mobile, isAuthenticated });
+      // Clean mobile number for comparison (remove any non-digits)
+      const cleanInputMobile = mobile.replace(/\D/g, '');
+      const cleanStudentMobile = student.mobile.replace(/\D/g, '');
+      isAuthenticated = cleanStudentMobile === cleanInputMobile;
+      console.log('Mobile authentication:', { 
+        inputMobile: mobile, 
+        cleanInputMobile, 
+        studentMobile: student.mobile, 
+        cleanStudentMobile,
+        isAuthenticated 
+      });
     }
     
     if (!isAuthenticated) {

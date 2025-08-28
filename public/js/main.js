@@ -128,8 +128,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Format mobile number inputs (only digits, max 10)
-    const mobileInputs = document.querySelectorAll('input[type="tel"], input[name="mobile"]');
+    // Format mobile number inputs (only digits, max 10) - Skip student login form to avoid conflicts
+    const mobileInputs = document.querySelectorAll('input[type="tel"]:not(#mobile), input[name="mobile"]:not(#mobile)');
     mobileInputs.forEach(input => {
         input.addEventListener('input', function(e) {
             // Only allow digits and limit to 10 characters
