@@ -10,6 +10,29 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
+    <style>
+        /* Enhanced date picker styling */
+        input[type="date"] {
+            position: relative;
+            cursor: pointer !important;
+        }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+        
+        /* Ensure the entire date input is clickable */
+        input[type="date"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(52, 73, 94, 0.25);
+        }
+    </style>
 </head>
 
 <body>
@@ -100,11 +123,13 @@
                                             <i class="fas fa-calendar me-2"></i>
                                             Date of Birth
                                         </label>
-                                        <input type="text" class="form-control form-control-lg" id="dob" name="dob"
-                                            placeholder="DD/MM/YYYY" maxlength="10">
+                                        <input type="date" class="form-control form-control-lg" id="dob" name="dob"
+                                            max="<%= new Date().toISOString().split('T')[0] %>" 
+                                            min="1950-01-01"
+                                            style="cursor: pointer;">
                                         <div class="form-text">
                                             <i class="fas fa-info-circle me-1"></i>
-                                            Enter your date of birth in DD/MM/YYYY format
+                                            Select your date of birth from the calendar
                                         </div>
                                     </div>
 
@@ -169,7 +194,7 @@
                             </li>
                             <li class="mb-3">
                                 <i class="fas fa-check-circle me-2"></i>
-                                Date of Birth should be in DD/MM/YYYY format
+                                Use the date picker to select your Date of Birth
                             </li>
                             <li class="mb-3">
                                 <i class="fas fa-check-circle me-2"></i>
@@ -214,8 +239,8 @@
                                             <strong>Step 2: Choose Authentication Method</strong><br>
                                             <small class="text-muted">
                                                 <strong>Option A - Date of Birth:</strong><br>
-                                                Format: DD/MM/YYYY<br>
-                                                Example: 15/08/2005, 03/12/2004<br><br>
+                                                Use the date picker to select your birth date<br>
+                                                Click on the calendar icon to open date selector<br><br>
                                                 <strong>Option B - Mobile Number:</strong><br>
                                                 Format: 10 digits only<br>
                                                 Example: 9876543210, 8765432109
@@ -295,26 +320,14 @@
             const dobInput = document.getElementById('dob');
             const mobileInput = document.getElementById('mobile');
 
-            // Format date input as DD/MM/YYYY with visual feedback
-            dobInput.addEventListener('input', function (e) {
-                let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
-
-                if (value.length >= 2) {
-                    value = value.substring(0, 2) + '/' + value.substring(2);
-                }
-                if (value.length >= 5) {
-                    value = value.substring(0, 5) + '/' + value.substring(5, 9);
-                }
-
-                e.target.value = value;
-
+            // Date picker validation with visual feedback
+            dobInput.addEventListener('change', function (e) {
+                const value = e.target.value;
+                
                 // Visual feedback
-                if (value.length === 10) {
+                if (value) {
                     e.target.classList.add('is-valid');
                     e.target.classList.remove('is-invalid');
-                } else if (value.length > 0) {
-                    e.target.classList.add('is-invalid');
-                    e.target.classList.remove('is-valid');
                 } else {
                     e.target.classList.remove('is-valid', 'is-invalid');
                 }
@@ -354,9 +367,33 @@
             // Form validation
             document.getElementById('studentAuthForm').addEventListener('submit', function (e) {
                 const rollNo = document.getElementById('rollNo').value.trim();
-                const dob = dobInput.value.trim();
+                let dob = dobInput.value.trim();
                 const mobile = mobileInput.value.trim();
                 const submitBtn = this.querySelector('button[type="submit"]');
+                
+                // Convert date from YYYY-MM-DD to DD/MM/YYYY for backend compatibility
+                if (dob) {
+                    const dateObj = new Date(dob);
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    const convertedDate = `${day}/${month}/${year}`;
+                    
+                    console.log('Date conversion:', { original: dob, converted: convertedDate });
+                    
+                    // Update the hidden input or create one to send the converted date
+                    let hiddenDobInput = document.getElementById('dobConverted');
+                    if (!hiddenDobInput) {
+                        hiddenDobInput = document.createElement('input');
+                        hiddenDobInput.type = 'hidden';
+                        hiddenDobInput.name = 'dob';
+                        hiddenDobInput.id = 'dobConverted';
+                        this.appendChild(hiddenDobInput);
+                        // Remove name from original input to avoid conflict
+                        dobInput.removeAttribute('name');
+                    }
+                    hiddenDobInput.value = convertedDate;
+                }
 
                 // Clear any previous error states
                 document.querySelectorAll('.form-control').forEach(input => {
@@ -372,30 +409,23 @@
                 }
 
                 // Check if at least one authentication method is provided
-                if (!dob && !mobile) {
+                if (!dobInput.value.trim() && !mobile) {
                     dobInput.classList.add('is-invalid');
                     mobileInput.classList.add('is-invalid');
                     showError('Please enter either your date of birth or mobile number');
                     hasError = true;
                 }
 
-                // Validate date of birth if provided
-                if (dob) {
-                    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dob)) {
+                // Validate date of birth if provided (use original date picker value)
+                if (dobInput.value.trim()) {
+                    const selectedDate = new Date(dobInput.value); // Use original YYYY-MM-DD format
+                    const today = new Date();
+                    const minDate = new Date('1950-01-01');
+                    
+                    if (isNaN(selectedDate.getTime()) || selectedDate > today || selectedDate < minDate) {
                         dobInput.classList.add('is-invalid');
-                        showError('Date of birth must be in DD/MM/YYYY format');
+                        showError('Please select a valid date of birth');
                         hasError = true;
-                    } else {
-                        const parts = dob.split('/');
-                        const day = parseInt(parts[0], 10);
-                        const month = parseInt(parts[1], 10);
-                        const year = parseInt(parts[2], 10);
-
-                        if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > new Date().getFullYear()) {
-                            dobInput.classList.add('is-invalid');
-                            showError('Please enter a valid date of birth');
-                            hasError = true;
-                        }
                     }
                 }
 
@@ -417,7 +447,7 @@
                 }
 
                 // If both are provided, show warning
-                if (dob && mobile) {
+                if (dobInput.value.trim() && mobile) {
                     if (!confirm('You have entered both date of birth and mobile number. We will use date of birth for authentication. Continue?')) {
                         e.preventDefault();
                         return;
