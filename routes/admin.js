@@ -192,7 +192,7 @@ router.post('/students', requireAuth, validateStudent, handleValidationErrors, a
     
     // Convert DD/MM/YYYY to Date object
     const dobParts = dob.split('/');
-    const dobDate = new Date(dobParts[2], dobParts[1] - 1, dobParts[0]); // Year, Month (0-indexed), Day
+    const dobDate = new Date(Date.UTC(parseInt(dobParts[2], 10), parseInt(dobParts[1], 10) - 1, parseInt(dobParts[0], 10))); // Year, Month (0-indexed), Day
     
     const student = new Student({
       rollNo: rollNo.toUpperCase(),
@@ -247,15 +247,51 @@ router.post('/students/bulk', requireAuth, upload.single('excelFile'), async (re
           continue;
         }
         
-        // Handle date format - could be DD/MM/YYYY string or Excel date
+        // Handle date format - could be DD/MM/YYYY, DD-MM-YYYY string or Excel date
         let dobDate;
-        if (typeof row.dob === 'string' && row.dob.includes('/')) {
-          // DD/MM/YYYY format
-          const dobParts = row.dob.split('/');
-          dobDate = new Date(dobParts[2], dobParts[1] - 1, dobParts[0]);
-        } else {
+        
+        if (typeof row.dob === 'string' && row.dob.trim() && (row.dob.includes('/') || row.dob.includes('-'))) {
+          // DD/MM/YYYY or DD-MM-YYYY format
+          const dobParts = row.dob.includes('/') ? row.dob.split('/') : row.dob.split('-');
+          
+          if (dobParts.length === 3) {
+            const day = parseInt(dobParts[0].trim(), 10);
+            const month = parseInt(dobParts[1].trim(), 10);
+            const year = parseInt(dobParts[2].trim(), 10);
+            
+            // Validate the parsed values
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year) && 
+                day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900) {
+              // Use UTC to avoid timezone issues
+              dobDate = new Date(Date.UTC(year, month - 1, day));
+              
+              // Double check the date is valid (handles invalid dates like Feb 30)
+              if (dobDate.getUTCFullYear() === year && dobDate.getUTCMonth() === month - 1 && dobDate.getUTCDate() === day) {
+                // Date is valid
+              } else {
+                throw new Error(`Invalid date for ${row.name}: ${row.dob}`);
+              }
+            } else {
+              throw new Error(`Invalid date format for ${row.name}: ${row.dob}`);
+            }
+          } else {
+            throw new Error(`Invalid date format for ${row.name}: ${row.dob} - expected DD/MM/YYYY or DD-MM-YYYY`);
+          }
+        } else if (row.dob) {
           // Excel date or other format
-          dobDate = new Date(row.dob);
+          if (typeof row.dob === 'number') {
+            // Excel serial date number - use xlsx utility to convert
+            dobDate = xlsx.SSF.parse_date_code(row.dob);
+            dobDate = new Date(Date.UTC(dobDate.y, dobDate.m - 1, dobDate.d));
+          } else {
+            dobDate = new Date(row.dob);
+          }
+          
+          if (isNaN(dobDate.getTime())) {
+            throw new Error(`Invalid date for ${row.name}: ${row.dob}`);
+          }
+        } else {
+          throw new Error(`Missing date of birth for ${row.name}`);
         }
         
         const student = new Student({
@@ -300,7 +336,7 @@ router.put('/students/:rollNo', requireAuth, async (req, res) => {
     
     // Convert DD/MM/YYYY to Date object
     const dobParts = dob.split('/');
-    const dobDate = new Date(dobParts[2], dobParts[1] - 1, dobParts[0]);
+    const dobDate = new Date(Date.UTC(parseInt(dobParts[2], 10), parseInt(dobParts[1], 10) - 1, parseInt(dobParts[0], 10)));
     
     const result = await Student.updateOne(
       { rollNo },
