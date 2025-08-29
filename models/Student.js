@@ -30,7 +30,7 @@ const studentSchema = new mongoose.Schema({
   postApplied: {
     type: String,
     required: true,
-    enum: ['DCO', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'],
+    enum: ['DCP', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'],
     trim: true
   },
   omrImageUrl: {

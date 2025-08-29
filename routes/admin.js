@@ -127,7 +127,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     
     // Group answer keys by post
     const answerKeysByPost = {};
-    const posts = ['DCO', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'];
+    const posts = ['DCP', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'];
     posts.forEach(post => {
       answerKeysByPost[post] = answerKeys.find(ak => ak.postType === post) || null;
     });
@@ -167,7 +167,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
       students: [],
       answerKeys: [],
       answerKeysByPost: {},
-      posts: ['DCO', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'],
+      posts: ['DCP', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'],
       postStats: {},
       isOmrPublic: false,
       isResultsPublic: false,
@@ -677,7 +677,7 @@ router.post('/answer-key', requireAuth, upload.single('answerKeyFile'), async (r
     
     const { postType, publish } = req.body;
     
-    if (!postType || !['DCO', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'].includes(postType)) {
+    if (!postType || !['DCP', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'].includes(postType)) {
       req.session.errors = [{ msg: 'Please select a valid post type' }];
       return res.redirect('/admin/dashboard');
     }

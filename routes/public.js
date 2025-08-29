@@ -172,7 +172,7 @@ router.get('/answer-key', async (req, res) => {
   try {
     const { post } = req.query;
     
-    if (post && ['DCO', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'].includes(post)) {
+    if (post && ['DCP', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'].includes(post)) {
       // Get answer key for specific post
       const answerKey = await AnswerKey.findOne({ postType: post, isPublished: true });
       res.render('answer-key', { answerKey, post, answerKeys: null });
