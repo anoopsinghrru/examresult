@@ -23,31 +23,7 @@ body {
     border-radius: 5px;
 }
 
-/* Remove hover effects */
-.card:hover {
-    /* No hover effects */
-}
-
-.card .border {
-    /* No hover effects */
-}
-
-.card .border:hover {
-    /* No hover effects */
-}
-
-.rounded-circle {
-    /* No hover effects */
-}
-
-.rounded-circle:hover {
-    /* No hover effects */
-}
-
 /* Simple button styling */
-button[type="submit"]:hover {
-    /* No fancy hover effects */
-}
 
 /* Responsive adjustments */
 @media (max-width: 991.98px) {
@@ -132,20 +108,7 @@ button[type="submit"]:hover {
     padding: 0.5em 0.75em;
 }
 
-/* Remove animations */
-.card.bg-primary,
-.card.bg-success,
-.card.bg-info,
-.card.bg-warning {
-    /* No animations */
-}
-
-.card.bg-primary:hover,
-.card.bg-success:hover,
-.card.bg-info:hover,
-.card.bg-warning:hover {
-    /* No hover effects */
-}
+/* Animation styles removed for simplicity */
 
 /* Loading spinner */
 .spinner-border-sm {
@@ -265,10 +228,7 @@ footer {
     }
 }
 
-/* Remove form validation animation */
-.was-validated .form-control:invalid {
-    /* No animation */
-}
+/* Form validation animations disabled for simplicity */
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -404,4 +364,37 @@ footer {
 
 .btn:focus {
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Enhanced date picker styling (moved from index.ejs) */
+input[type="date"] {
+    position: relative;
+    cursor: pointer !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    font-size: 1.2em;
+    opacity: 0.8;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Ensure the entire date input is clickable */
+input[type="date"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(52, 73, 94, 0.25);
+}
+
+/* Print styles for result page (moved from result.ejs) */
+@media print {
+    .btn, .navbar, footer {
+        display: none !important;
+    }
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
 }
