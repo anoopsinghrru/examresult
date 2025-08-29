@@ -23,14 +23,17 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: [
         "'self'",
+        "'unsafe-inline'", // Required for Bootstrap inline styles
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com"
       ],
       scriptSrc: [
         "'self'",
+        "'unsafe-inline'", // Required for inline scripts in EJS templates
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com"
       ],
+      scriptSrcAttr: ["'unsafe-inline'"], // Allow inline event handlers
       imgSrc: ["'self'", "data:", "https:"],
       fontSrc: [
         "'self'",

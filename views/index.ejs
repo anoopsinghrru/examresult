@@ -10,6 +10,29 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
+    <style>
+        /* Enhanced date picker styling */
+        input[type="date"] {
+            position: relative;
+            cursor: pointer !important;
+        }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+        
+        /* Ensure the entire date input is clickable */
+        input[type="date"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(52, 73, 94, 0.25);
+        }
+    </style>
 </head>
 
 <body>
@@ -266,6 +289,34 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileInput = document.getElementById('mobile');
+
+            // Simple mobile number formatting - only digits, max 10
+            if (mobileInput) {
+                mobileInput.addEventListener('input', function (e) {
+                    // Remove all non-digits and limit to 10
+                    e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
+                });
+
+                // Handle paste events
+                mobileInput.addEventListener('paste', function (e) {
+                    setTimeout(() => {
+                        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
+                    }, 0);
+                });
+            }
+
+            // Auto-focus roll number field
+            const rollNoInput = document.getElementById('rollNo');
+            if (rollNoInput) {
+                rollNoInput.focus();
+            }
+            
+            // Let the form submit naturally - no interference like admin login
+        });
+    </script>
 </body>
 
 </html>
