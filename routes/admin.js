@@ -434,19 +434,11 @@ router.delete('/students/:rollNo/results', requireAuth, async (req, res) => {
       return res.json({ success: false, message: 'Student not found' });
     }
     
-    console.log('Before deletion - Student results:', student.results);
-    
     // Use $unset to completely remove the results field
     const updateResult = await Student.updateOne(
       { rollNo },
       { $unset: { results: 1 } }
     );
-    
-    console.log('Update result:', updateResult);
-    
-    // Verify the deletion worked
-    const updatedStudent = await Student.findOne({ rollNo });
-    console.log('After deletion - Student results:', updatedStudent.results);
     
     res.json({ success: true, message: 'Results deleted successfully' });
   } catch (error) {
@@ -641,8 +633,6 @@ router.put('/omr/public', requireAuth, async (req, res) => {
     // Handle both boolean and string values
     const publicValue = isPublic === true || isPublic === 'true';
     
-    console.log('OMR Public toggle - received:', isPublic, 'type:', typeof isPublic, 'setting to:', publicValue);
-    
     await Config.findOneAndUpdate(
       { key: 'omrPublic' },
       { key: 'omrPublic', value: publicValue, updatedAt: new Date() },
@@ -663,8 +653,6 @@ router.put('/results/public', requireAuth, async (req, res) => {
     
     // Handle both boolean and string values
     const publicValue = isPublic === true || isPublic === 'true';
-    
-    console.log('Results Public toggle - received:', isPublic, 'type:', typeof isPublic, 'setting to:', publicValue);
     
     await Config.findOneAndUpdate(
       { key: 'resultsPublic' },
@@ -742,7 +730,6 @@ router.post('/answer-key', requireAuth, upload.single('answerKeyFile'), async (r
 router.put('/answer-key/publish', requireAuth, async (req, res) => {
   try {
     const { isPublished, postType } = req.body;
-    console.log('Toggle answer key request:', { isPublished, postType, type: typeof isPublished });
     
     if (!postType) {
       return res.json({ success: false, message: 'Post type is required' });

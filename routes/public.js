@@ -33,32 +33,19 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
   try {
     let { rollNo, dob, mobile } = req.body;
     
-    // Enhanced logging for mobile debugging
-    const userAgent = req.get('User-Agent') || '';
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-    
-    console.log('=== AUTHENTICATION DEBUG START ===');
-    console.log('Raw Request Body:', req.body);
-    console.log('Device Info:', { isMobile, userAgent: userAgent.substring(0, 100) });
-    
     // Server-side date conversion from YYYY-MM-DD to DD/MM/YYYY
     if (dob && dob.includes('-')) {
       // HTML5 date input sends YYYY-MM-DD format
       const dateParts = dob.split('-');
       if (dateParts.length === 3) {
         dob = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // Convert to DD/MM/YYYY
-        console.log('Server-side date conversion:', { original: req.body.dob, converted: dob });
       }
     }
-    
-    console.log('Final values:', { rollNo, dob, mobile });
-    console.log('=== AUTHENTICATION DEBUG END ===');
     
     // Find student by roll number
     const student = await Student.findOne({ rollNo: rollNo.toUpperCase() });
     
     if (!student) {
-      console.log('Student not found:', rollNo?.toUpperCase());
       req.session.errors = [{ msg: 'Please check your details and try again.' }];
       return res.redirect('/');
     }
@@ -72,28 +59,17 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
       const inputDate = new Date(parts[2], parts[1] - 1, parts[0]); // Year, Month (0-indexed), Day
       const studentDob = new Date(student.dob);
       isAuthenticated = inputDate.toDateString() === studentDob.toDateString();
-      console.log('DOB authentication:', { inputDate: inputDate.toDateString(), studentDob: studentDob.toDateString(), isAuthenticated });
     } else if (mobile) {
       // Clean mobile number for comparison (remove any non-digits)
       const cleanInputMobile = mobile.replace(/\D/g, '');
       const cleanStudentMobile = student.mobile.replace(/\D/g, '');
       isAuthenticated = cleanStudentMobile === cleanInputMobile;
-      console.log('Mobile authentication:', { 
-        inputMobile: mobile, 
-        cleanInputMobile, 
-        studentMobile: student.mobile, 
-        cleanStudentMobile,
-        isAuthenticated 
-      });
     }
     
     if (!isAuthenticated) {
-      console.log('Authentication failed for student:', rollNo?.toUpperCase());
       req.session.errors = [{ msg: 'Please check your details and try again.' }];
       return res.redirect('/');
     }
-    
-    console.log('Student authenticated successfully:', rollNo?.toUpperCase());
     
     // Store authenticated student in session for secure file access
     req.session.authenticatedStudent = {
@@ -108,7 +84,6 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
     
     // If no data exists at all, deny login
     if (!hasOMR && !hasResults) {
-      console.log('No data available for student:', rollNo?.toUpperCase());
       req.session.errors = [{ msg: 'No data available for your roll number. Please contact the nearby municipality or check back later.' }];
       return res.redirect('/');
     }
@@ -125,8 +100,6 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
     if (hasResults) {
       scoreBreakdown = getScoreBreakdown(student.results);
     }
-    
-    console.log('Rendering result page:', { hasOMR, hasResults, isOmrPublic, isResultsPublic });
     
     res.render('result', {
       student,
@@ -177,9 +150,6 @@ router.get('/secure/omr/:rollNo', omrRateLimit, async (req, res) => {
       return res.status(404).json({ error: 'OMR file not found on server' });
     }
     
-    // Log access for audit
-    console.log(`OMR access: ${requestedRollNo} at ${new Date().toISOString()}`);
-    
     // Serve the file
     res.sendFile(filePath);
     
@@ -195,18 +165,7 @@ router.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-// Debug endpoint to test form submission
-router.post('/debug', (req, res) => {
-  console.log('=== DEBUG ENDPOINT ===');
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-  console.log('User Agent:', req.get('User-Agent'));
-  res.json({
-    success: true,
-    received: req.body,
-    userAgent: req.get('User-Agent')
-  });
-});
+
 
 // Public answer key page
 router.get('/answer-key', async (req, res) => {

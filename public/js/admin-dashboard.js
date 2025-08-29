@@ -18,7 +18,6 @@ function toggleOMRPublic(isPublic) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         alert('An error occurred while updating OMR status');
     });
 }
@@ -41,7 +40,6 @@ function toggleResultsPublic(isPublic) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         alert('An error occurred while updating results status');
     });
 }
@@ -139,7 +137,6 @@ function deleteOMR(rollNo) {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
             alert('An error occurred while deleting OMR');
         })
         .finally(() => {
@@ -191,7 +188,6 @@ function editStudent(rollNo) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         alert('An error occurred while fetching student data');
     });
 }
@@ -532,7 +528,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // If there are backdrops but no open modals, clean them up
         if (backdrops.length > 0 && openModals.length === 0) {
-            console.log('Cleaning up orphaned modal backdrops');
             cleanupModalBackdrops();
         }
     }, 2000); // Check every 2 seconds
@@ -660,7 +655,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                         window[funcName].apply(null, args);
                     } catch (error) {
-                        console.error('Error executing onclick handler:', error);
+                        // Silently handle onclick errors
                     }
                 }
             }
@@ -811,14 +806,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         resetUploadForm();
                     }
                 } catch (error) {
-                    console.error('Error parsing response:', error);
                     alert('An error occurred while uploading OMR');
                     resetUploadForm();
                 }
             };
             
             xhr.onerror = function() {
-                console.error('Upload error');
                 alert('An error occurred while uploading OMR');
                 resetUploadForm();
             };
@@ -842,41 +835,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Add Results Form
-    const addResultsForm = document.getElementById('addResultsForm');
-    if (addResultsForm) {
-        addResultsForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const rollNo = formData.get('rollNo');
-            
-            fetch(`/admin/students/${rollNo}/results`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    correctAnswers: formData.get('correctAnswers'),
-                    wrongAnswers: formData.get('wrongAnswers'),
-                    unattempted: formData.get('unattempted'),
-                    finalScore: formData.get('finalScore'),
-                    percentage: formData.get('percentage')
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while saving results');
-            });
-        });
-    }
+    // Add Results Form - handled by embedded JavaScript in dashboard.ejs
 
     // Handle forms with progress tracking
     const bulkOMRForm = document.getElementById('bulkOMRForm');
@@ -980,7 +939,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         xhr.onerror = function() {
-            console.error('Upload error');
             alert('An error occurred during upload');
             resetFormState(submitBtn, progressBar, progressText);
         };
@@ -1036,7 +994,7 @@ document.addEventListener('DOMContentLoaded', function() {
     normalForms.forEach(formId => {
         const form = document.getElementById(formId);
         if (form) {
-            console.log(`Found form: ${formId} - allowing normal submission`);
+            // Allow normal form submission
         }
     });
 });
