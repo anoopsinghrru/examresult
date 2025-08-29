@@ -95,6 +95,15 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
     const isOmrPublic = omrPublicConfig ? omrPublicConfig.value : false;
     const isResultsPublic = resultsPublicConfig ? resultsPublicConfig.value : false;
     
+    // If data exists but nothing is public, deny login
+    const hasPublicOMR = hasOMR && isOmrPublic;
+    const hasPublicResults = hasResults && isResultsPublic;
+    
+    if (!hasPublicOMR && !hasPublicResults) {
+      req.session.errors = [{ msg: 'No data available for your roll number. Please contact the nearby municipality or check back later.' }];
+      return res.redirect('/');
+    }
+    
     // Get score breakdown if results exist
     let scoreBreakdown = null;
     if (hasResults) {
