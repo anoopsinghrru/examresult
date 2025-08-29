@@ -31,19 +31,28 @@ router.get('/', (req, res) => {
 // Handle student authentication and display results
 router.post('/view', validateStudentAuth, handleValidationErrors, async (req, res) => {
   try {
-    const { rollNo, dob, mobile } = req.body;
+    let { rollNo, dob, mobile } = req.body;
     
     // Enhanced logging for mobile debugging
     const userAgent = req.get('User-Agent') || '';
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
     
-    console.log('Student authentication attempt:', { 
-      rollNo: rollNo?.toUpperCase(), 
-      hasDob: !!dob, 
-      hasMobile: !!mobile,
-      isMobile,
-      userAgent: userAgent.substring(0, 100)
-    });
+    console.log('=== AUTHENTICATION DEBUG START ===');
+    console.log('Raw Request Body:', req.body);
+    console.log('Device Info:', { isMobile, userAgent: userAgent.substring(0, 100) });
+    
+    // Server-side date conversion from YYYY-MM-DD to DD/MM/YYYY
+    if (dob && dob.includes('-')) {
+      // HTML5 date input sends YYYY-MM-DD format
+      const dateParts = dob.split('-');
+      if (dateParts.length === 3) {
+        dob = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // Convert to DD/MM/YYYY
+        console.log('Server-side date conversion:', { original: req.body.dob, converted: dob });
+      }
+    }
+    
+    console.log('Final values:', { rollNo, dob, mobile });
+    console.log('=== AUTHENTICATION DEBUG END ===');
     
     // Find student by roll number
     const student = await Student.findOne({ rollNo: rollNo.toUpperCase() });
@@ -184,6 +193,19 @@ router.get('/secure/omr/:rollNo', omrRateLimit, async (req, res) => {
 router.get('/logout', (req, res) => {
   req.session.authenticatedStudent = null;
   res.redirect('/');
+});
+
+// Debug endpoint to test form submission
+router.post('/debug', (req, res) => {
+  console.log('=== DEBUG ENDPOINT ===');
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+  console.log('User Agent:', req.get('User-Agent'));
+  res.json({
+    success: true,
+    received: req.body,
+    userAgent: req.get('User-Agent')
+  });
 });
 
 // Public answer key page

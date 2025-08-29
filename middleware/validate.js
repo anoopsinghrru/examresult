@@ -27,19 +27,43 @@ const validateStudentAuth = [
     .optional()
     .custom((value) => {
       if (value) {
-        // Validate date format DD/MM/YYYY
-        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
-          throw new Error('Date must be in DD/MM/YYYY format');
+        // Handle both YYYY-MM-DD (HTML5 date input) and DD/MM/YYYY formats
+        let day, month, year;
+        
+        if (value.includes('-')) {
+          // YYYY-MM-DD format from HTML5 date input
+          const parts = value.split('-');
+          if (parts.length === 3) {
+            year = parseInt(parts[0], 10);
+            month = parseInt(parts[1], 10);
+            day = parseInt(parts[2], 10);
+          } else {
+            throw new Error('Invalid date format');
+          }
+        } else if (value.includes('/')) {
+          // DD/MM/YYYY format
+          const parts = value.split('/');
+          if (parts.length === 3) {
+            day = parseInt(parts[0], 10);
+            month = parseInt(parts[1], 10);
+            year = parseInt(parts[2], 10);
+          } else {
+            throw new Error('Invalid date format');
+          }
+        } else {
+          throw new Error('Invalid date format');
         }
         
-        // Validate if it's a valid date
-        const parts = value.split('/');
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10);
-        const year = parseInt(parts[2], 10);
-        
+        // Validate date components
         if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > new Date().getFullYear()) {
           throw new Error('Please enter a valid date of birth');
+        }
+        
+        // Validate that it's not a future date
+        const inputDate = new Date(year, month - 1, day);
+        const today = new Date();
+        if (inputDate > today) {
+          throw new Error('Date of birth cannot be in the future');
         }
       }
       return true;

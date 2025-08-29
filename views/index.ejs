@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Login - OMR Result Viewer</title>
 <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAAAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="image/x-icon">
 
@@ -11,61 +11,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
     <style>
-        /* Enhanced date picker styling with mobile support */
+        /* Enhanced date picker styling */
         input[type="date"] {
             position: relative;
             cursor: pointer !important;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
         }
         
         input[type="date"]::-webkit-calendar-picker-indicator {
             cursor: pointer;
             font-size: 1.2em;
             opacity: 0.8;
-            padding: 4px;
         }
         
         input[type="date"]::-webkit-calendar-picker-indicator:hover {
             opacity: 1;
         }
         
-        /* Mobile-specific date input styling */
-        @media (max-width: 768px) {
-            input[type="date"] {
-                font-size: 16px !important; /* Prevents zoom on iOS */
-                padding: 12px !important;
-            }
-            
-            input[type="tel"] {
-                font-size: 16px !important; /* Prevents zoom on iOS */
-                padding: 12px !important;
-            }
-        }
-        
         /* Ensure the entire date input is clickable */
         input[type="date"]:focus {
             outline: none;
             box-shadow: 0 0 0 0.2rem rgba(52, 73, 94, 0.25);
-        }
-        
-        /* Mobile form improvements */
-        @media (max-width: 768px) {
-            .form-control-lg {
-                font-size: 16px !important;
-                padding: 12px 16px !important;
-            }
-            
-            .btn-lg {
-                font-size: 16px !important;
-                padding: 12px 24px !important;
-            }
-            
-            /* Prevent zoom on form inputs */
-            input, select, textarea {
-                font-size: 16px !important;
-            }
         }
     </style>
 </head>
@@ -126,21 +91,7 @@
                             </div>
                             <% } %>
 
-                                <form action="/view" method="POST" id="studentAuthForm" style="position: relative;">
-                                    <!-- Loading Overlay -->
-                                    <div id="loadingOverlay" class="d-none"
-                                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 1000; border-radius: 10px;">
-                                        <div class="d-flex justify-content-center align-items-center h-100">
-                                            <div class="text-center">
-                                                <div class="spinner-border text-primary mb-3" role="status"
-                                                    style="width: 3rem; height: 3rem;">
-                                                    <span class="visually-hidden">Loading...</span>
-                                                </div>
-                                                <div class="h5 text-primary">Verifying your details...</div>
-                                                <div class="text-muted">Please wait while we authenticate you</div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <form action="/view" method="POST" id="studentAuthForm">
 
                                     <!-- Roll Number -->
                                     <div class="mb-4">
@@ -184,8 +135,7 @@
                                             Mobile Number
                                         </label>
                                         <input type="tel" class="form-control form-control-lg" id="mobile" name="mobile"
-                                            placeholder="10 digit mobile number" maxlength="10" 
-                                            autocomplete="tel" inputmode="numeric" pattern="[0-9]{10}">
+                                            placeholder="10 digit mobile number" maxlength="10">
                                         <div class="form-text">
                                             <i class="fas fa-info-circle me-1"></i>
                                             Enter your 10 digit mobile number
@@ -341,327 +291,30 @@
     <script src="/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Hide loading overlay on page load (in case of redirect back)
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            if (loadingOverlay) {
-                loadingOverlay.classList.add('d-none');
-            }
-
-            // Re-enable submit button
-            const submitBtn = document.querySelector('#studentAuthForm button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.disabled = false;
-            }
-
-            const dobInput = document.getElementById('dob');
             const mobileInput = document.getElementById('mobile');
 
-            // Mobile detection
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
-            console.log('User Agent:', navigator.userAgent);
-            console.log('Screen size:', window.screen.width + 'x' + window.screen.height);
-            console.log('Viewport size:', window.innerWidth + 'x' + window.innerHeight);
-
-            // Date picker validation with visual feedback
-            dobInput.addEventListener('change', function (e) {
-                const value = e.target.value;
-                
-                // Visual feedback
-                if (value) {
-                    e.target.classList.add('is-valid');
-                    e.target.classList.remove('is-invalid');
-                } else {
-                    e.target.classList.remove('is-valid', 'is-invalid');
-                }
-            });
-
-            // Enhanced mobile input handling with debouncing
-            let mobileInputTimeout;
-            
-            // Format mobile input (only digits) with visual feedback - Mobile optimized
-            mobileInput.addEventListener('input', function (e) {
-                // Clear previous timeout
-                if (mobileInputTimeout) {
-                    clearTimeout(mobileInputTimeout);
-                }
-                
-                // Debounce for mobile devices to prevent conflicts
-                mobileInputTimeout = setTimeout(() => {
+            // Simple mobile number formatting - only digits, max 10
+            if (mobileInput) {
+                mobileInput.addEventListener('input', function (e) {
                     // Remove all non-digits and limit to 10
-                    let cleanValue = e.target.value.replace(/\D/g, '').substring(0, 10);
-                    
-                    // Only update if value changed to prevent cursor jumping on mobile
-                    if (e.target.value !== cleanValue) {
-                        e.target.value = cleanValue;
-                    }
-
-                    // Visual feedback
-                    if (cleanValue.length === 10) {
-                        e.target.classList.add('is-valid');
-                        e.target.classList.remove('is-invalid');
-                    } else if (cleanValue.length > 0) {
-                        e.target.classList.add('is-invalid');
-                        e.target.classList.remove('is-valid');
-                    } else {
-                        e.target.classList.remove('is-valid', 'is-invalid');
-                    }
-                }, isMobile ? 300 : 0); // Longer delay on mobile
-            });
-
-            // Handle paste events for mobile
-            mobileInput.addEventListener('paste', function (e) {
-                setTimeout(() => {
-                    let cleanValue = e.target.value.replace(/\D/g, '').substring(0, 10);
-                    e.target.value = cleanValue;
-                    
-                    // Trigger validation
-                    if (cleanValue.length === 10) {
-                        e.target.classList.add('is-valid');
-                        e.target.classList.remove('is-invalid');
-                    } else if (cleanValue.length > 0) {
-                        e.target.classList.add('is-invalid');
-                        e.target.classList.remove('is-valid');
-                    }
-                }, 100);
-            });
-
-            // Clear validation when switching between fields
-            dobInput.addEventListener('focus', function () {
-                mobileInput.classList.remove('is-valid', 'is-invalid');
-                // Clear any client-side error alerts
-                const clientError = document.querySelector('.alert-danger.client-error');
-                if (clientError) clientError.remove();
-            });
-
-            mobileInput.addEventListener('focus', function () {
-                dobInput.classList.remove('is-valid', 'is-invalid');
-                // Clear any client-side error alerts
-                const clientError = document.querySelector('.alert-danger.client-error');
-                if (clientError) clientError.remove();
-            });
-
-            // Form validation with mobile-specific improvements
-            document.getElementById('studentAuthForm').addEventListener('submit', function (e) {
-                const rollNo = document.getElementById('rollNo').value.trim();
-                let dob = dobInput.value.trim();
-                const mobile = mobileInput.value.trim();
-                const submitBtn = this.querySelector('button[type="submit"]');
-                
-                console.log('Form submission attempt:', { rollNo, hasDob: !!dob, hasMobile: !!mobile, isMobile });
-                
-                // Mobile-safe date conversion from YYYY-MM-DD to DD/MM/YYYY
-                if (dob) {
-                    try {
-                        // Parse date string directly to avoid timezone issues
-                        const dateParts = dob.split('-'); // YYYY-MM-DD format
-                        if (dateParts.length === 3) {
-                            const year = dateParts[0];
-                            const month = dateParts[1];
-                            const day = dateParts[2];
-                            const convertedDate = `${day}/${month}/${year}`;
-                            
-                            console.log('Mobile-safe date conversion:', { original: dob, converted: convertedDate });
-                            
-                            // Update the hidden input or create one to send the converted date
-                            let hiddenDobInput = document.getElementById('dobConverted');
-                            if (!hiddenDobInput) {
-                                hiddenDobInput = document.createElement('input');
-                                hiddenDobInput.type = 'hidden';
-                                hiddenDobInput.name = 'dob';
-                                hiddenDobInput.id = 'dobConverted';
-                                this.appendChild(hiddenDobInput);
-                                // Remove name from original input to avoid conflict
-                                dobInput.removeAttribute('name');
-                            }
-                            hiddenDobInput.value = convertedDate;
-                        } else {
-                            console.error('Invalid date format:', dob);
-                            showError('Invalid date format. Please select a valid date.');
-                            e.preventDefault();
-                            return;
-                        }
-                    } catch (error) {
-                        console.error('Date conversion error:', error);
-                        showError('Error processing date. Please try again.');
-                        e.preventDefault();
-                        return;
-                    }
-                }
-
-                // Clear any previous error states
-                document.querySelectorAll('.form-control').forEach(input => {
-                    input.classList.remove('is-invalid');
+                    e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
                 });
 
-                let hasError = false;
-
-                // Validate roll number
-                if (!rollNo) {
-                    document.getElementById('rollNo').classList.add('is-invalid');
-                    showError('Please enter your roll number');
-                    hasError = true;
-                }
-
-                // Check if at least one authentication method is provided
-                if (!dobInput.value.trim() && !mobile) {
-                    dobInput.classList.add('is-invalid');
-                    mobileInput.classList.add('is-invalid');
-                    showError('Please enter either your date of birth or mobile number');
-                    hasError = true;
-                }
-
-                // Validate date of birth if provided - Mobile-safe validation
-                if (dobInput.value.trim()) {
-                    try {
-                        // Parse date string directly to avoid timezone issues on mobile
-                        const dateParts = dobInput.value.split('-'); // YYYY-MM-DD format
-                        if (dateParts.length === 3) {
-                            const year = parseInt(dateParts[0], 10);
-                            const month = parseInt(dateParts[1], 10);
-                            const day = parseInt(dateParts[2], 10);
-                            
-                            // Validate date components
-                            const today = new Date();
-                            const currentYear = today.getFullYear();
-                            
-                            if (year < 1950 || year > currentYear || 
-                                month < 1 || month > 12 || 
-                                day < 1 || day > 31) {
-                                dobInput.classList.add('is-invalid');
-                                showError('Please select a valid date of birth');
-                                hasError = true;
-                            }
-                            
-                            // Check if date is not in future
-                            const inputDate = new Date(year, month - 1, day);
-                            if (inputDate > today) {
-                                dobInput.classList.add('is-invalid');
-                                showError('Date of birth cannot be in the future');
-                                hasError = true;
-                            }
-                        } else {
-                            dobInput.classList.add('is-invalid');
-                            showError('Please select a valid date of birth');
-                            hasError = true;
-                        }
-                    } catch (error) {
-                        console.error('Date validation error:', error);
-                        dobInput.classList.add('is-invalid');
-                        showError('Please select a valid date of birth');
-                        hasError = true;
-                    }
-                }
-
-                // Enhanced mobile number validation
-                if (mobile) {
-                    // Clean the mobile number one more time
-                    const cleanMobile = mobile.replace(/\D/g, '');
-                    console.log('Mobile validation:', { original: mobile, cleaned: cleanMobile });
-                    
-                    if (!/^\d{10}$/.test(cleanMobile)) {
-                        mobileInput.classList.add('is-invalid');
-                        showError('Mobile number must be exactly 10 digits');
-                        hasError = true;
-                    } else {
-                        // Update the input value with cleaned version
-                        mobileInput.value = cleanMobile;
-                    }
-                }
-
-                if (hasError) {
-                    e.preventDefault();
-                    // Ensure loading overlay is hidden on validation errors
-                    isSubmitting = false;
-                    const loadingOverlay = document.getElementById('loadingOverlay');
-                    if (loadingOverlay) loadingOverlay.classList.add('d-none');
-                    submitBtn.disabled = false;
-                    return;
-                }
-
-                // If both are provided, show warning
-                if (dobInput.value.trim() && mobile) {
-                    if (!confirm('You have entered both date of birth and mobile number. We will use date of birth for authentication. Continue?')) {
-                        e.preventDefault();
-                        return;
-                    }
-                }
-
-                console.log('Form validation passed, submitting...');
-
-                // Show loading overlay with mobile-optimized timing
-                isSubmitting = true;
-                const loadingOverlay = document.getElementById('loadingOverlay');
-                if (loadingOverlay) {
-                    loadingOverlay.classList.remove('d-none');
-                }
-                submitBtn.disabled = true;
-
-                // Mobile-optimized fallback timing (longer for mobile connections)
-                const fallbackTime = isMobile ? 20000 : 15000;
-                setTimeout(() => {
-                    if (isSubmitting) {
-                        console.warn('Form submission timeout, re-enabling form');
-                        isSubmitting = false;
-                        if (loadingOverlay) loadingOverlay.classList.add('d-none');
-                        submitBtn.disabled = false;
-                    }
-                }, fallbackTime);
-            });
-
-            // Enhanced error handling function
-            function showError(message) {
-                console.error('Validation error:', message);
-                
-                // Remove existing error alerts
-                const existingAlert = document.querySelector('.alert-danger.client-error');
-                if (existingAlert) {
-                    existingAlert.remove();
-                }
-
-                // Create new error alert
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-danger client-error';
-                alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
-
-                // Insert before the form
-                const form = document.getElementById('studentAuthForm');
-                form.parentNode.insertBefore(alertDiv, form);
-
-                // Scroll to error on mobile
-                if (isMobile) {
-                    alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-
-                // Auto-remove after longer time on mobile
-                setTimeout(() => {
-                    if (alertDiv && alertDiv.parentNode) {
-                        alertDiv.remove();
-                    }
-                }, isMobile ? 8000 : 5000);
+                // Handle paste events
+                mobileInput.addEventListener('paste', function (e) {
+                    setTimeout(() => {
+                        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
+                    }, 0);
+                });
             }
 
-            // Handle page unload and visibility changes to reset loading state
-            let isSubmitting = false;
-            
-            function resetFormState() {
-                if (isSubmitting) {
-                    console.log('Resetting form state');
-                    isSubmitting = false;
-                    const loadingOverlay = document.getElementById('loadingOverlay');
-                    const submitBtn = document.querySelector('#studentAuthForm button[type="submit"]');
-                    if (loadingOverlay) loadingOverlay.classList.add('d-none');
-                    if (submitBtn) submitBtn.disabled = false;
-                }
+            // Auto-focus roll number field
+            const rollNoInput = document.getElementById('rollNo');
+            if (rollNoInput) {
+                rollNoInput.focus();
             }
             
-            window.addEventListener('beforeunload', resetFormState);
-            window.addEventListener('pagehide', resetFormState);
-            document.addEventListener('visibilitychange', function() {
-                if (document.visibilityState === 'visible') {
-                    resetFormState();
-                }
-            });
+            // Let the form submit naturally - no interference like admin login
         });
     </script>
 </body>
