@@ -562,7 +562,10 @@ router.post('/omr/bulk', requireAuth, upload.single('zipFile'), async (req, res)
         if (entry.isDirectory) continue;
         
         const fileName = entry.entryName;
-        const rollNo = path.parse(fileName).name.toUpperCase();
+        const fileNameWithoutExt = path.parse(fileName).name;
+        const rollNo = fileNameWithoutExt.includes('_') 
+          ? fileNameWithoutExt.split('_').pop().toUpperCase()
+          : fileNameWithoutExt.toUpperCase();
         const fileExtension = path.parse(fileName).ext.toLowerCase();
         
         // Check if file is an image
