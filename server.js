@@ -133,8 +133,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI || 'mongodb:/examresult:Dca@240031101631008@/127.0.0.1:27017/examresult',
-    touchAfter: 24 * 3600 // lazy session update
+    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/omr_results',
+    touchAfter: 24 * 3600
   }),
   cookie: {
     secure: process.env.NODE_ENV === 'production' && process.env.TRUST_PROXY !== 'false',
@@ -148,7 +148,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb:/examresult:Dca@240031101631008@/127.0.0.1:27017/examresult')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/omr_results')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 

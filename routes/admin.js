@@ -790,8 +790,7 @@ router.get('/secure/omr/:rollNo', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'OMR file not found on server' });
     }
     
-    // Log admin access for audit
-    console.log(`Admin OMR access: ${rollNo} by admin ${req.session.adminId} at ${new Date().toISOString()}`);
+    console.log(`OMR access: ${rollNo} at ${new Date().toISOString()}`);
     
     // Serve the file
     res.sendFile(filePath);
