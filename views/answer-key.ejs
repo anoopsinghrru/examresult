@@ -45,14 +45,14 @@
                     <div class="card-header text-white text-center" style="background-color: #34495e;">
                         <h4 class="mb-0">
                             <i class="fas fa-key me-2"></i>
-                            Answer Key
+                            Provisional Answer Key
                         </h4>
                     </div>
                     <div class="card-body">
                         <% if (typeof answerKeys !== 'undefined' && answerKeys && answerKeys.length > 0) { %>
                             <!-- Multiple Answer Keys Display -->
                             <div class="mb-4">
-                                <h6 class="text-center mb-4">Published Answer Keys</h6>
+                                <h6 class="text-center mb-4"></h6>
                                 
                                 <!-- Quick Access Cards -->
                                 <div class="row mb-4">
@@ -91,7 +91,7 @@
                             <% if (objectionDocs && objectionDocs.length > 0) { %>
                                 <div class="mt-5">
                                     <div class="text-center mb-4">
-                                        <h6>વાંધા અરજી (Objection Application)</h6>
+                                        <h6>વાંધા સૂચન </h6>
                                         <p class="text-muted small">
                                             Answer key સામે વાંધો હોય તો નીચેના documents વાપરો
                                         </p>
@@ -104,11 +104,11 @@
                                                     <div class="card-body text-center">
                                                         <h6 class="card-title" style="color: #34495e;">
                                                             <i class="fas <%= doc.documentType === 'guidelines' ? 'fa-book' : 'fa-file-alt' %> me-2"></i>
-                                                            <%= doc.documentType === 'guidelines' ? 'વાંધા અરજી માર્ગદર્શિકા' : 'વાંધા અરજી ફોર્મ' %>
+                                                            <%= doc.documentType === 'guidelines' ? 'વાંધા સુચન માર્ગદર્શિકા' : 'વાંધા સૂચન અરજી ફોર્મ' %>
                                                         </h6>
-                                                        <p class="card-text text-muted small">
+                                                        <!-- <p class="card-text text-muted small">
                                                             <%= doc.documentType === 'guidelines' ? 'Guidelines for Objection' : 'Objection Application Form' %>
-                                                        </p>
+                                                        </p> -->
                                                         <div class="d-grid gap-2">
                                                             <a href="<%= doc.fileUrl %>" target="_blank" class="btn btn-sm text-white" style="background-color: #34495e;">
                                                                 <i class="fas fa-eye me-1"></i>
