@@ -585,9 +585,19 @@ router.post('/omr/bulk', requireAuth, upload.single('zipFile'), async (req, res)
         
         const fileName = entry.entryName;
         const fileNameWithoutExt = path.parse(fileName).name;
-        const rollNo = fileNameWithoutExt.includes('_') 
+        let rollNo = fileNameWithoutExt.includes('_') 
           ? fileNameWithoutExt.split('_').pop().toUpperCase()
           : fileNameWithoutExt.toUpperCase();
+        
+        // Map DCO001-DCO300 to DCP001-DCP300
+        if (rollNo.startsWith('DCO') && rollNo.length === 6) {
+          const numberPart = rollNo.substring(3); // Get the number part (001-300)
+          const num = parseInt(numberPart, 10);
+          if (num >= 1 && num <= 300) {
+            rollNo = 'DCP' + numberPart; // Replace DCO with DCP, keep the number part
+          }
+        }
+        
         const fileExtension = path.parse(fileName).ext.toLowerCase();
         
         // Check if file is an image
