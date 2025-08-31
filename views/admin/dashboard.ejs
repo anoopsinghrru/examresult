@@ -741,6 +741,137 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Objection Documents Management -->
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Objection Documents Management
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Current Documents Status -->
+                                        <div class="row mb-4">
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card border-<%= objectionDocsByType.guidelines ? (objectionDocsByType.guidelines.isActive ? 'success' : 'warning') : 'secondary' %>">
+                                                    <div class="card-header bg-<%= objectionDocsByType.guidelines ? (objectionDocsByType.guidelines.isActive ? 'success' : 'warning') : 'secondary' %> text-white">
+                                                        <h6 class="mb-0">
+                                                            <i class="fas fa-book me-2"></i>
+                                                            વાંધા અરજી માર્ગદર્શિકા (Guidelines)
+                                                        </h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <% if (objectionDocsByType.guidelines) { %>
+                                                            <p class="mb-2"><strong>File:</strong> <%= objectionDocsByType.guidelines.fileName %></p>
+                                                            <p class="mb-2"><strong>Status:</strong>
+                                                                <span class="badge <%= objectionDocsByType.guidelines.isActive ? 'bg-success' : 'bg-warning' %>">
+                                                                    <%= objectionDocsByType.guidelines.isActive ? 'Active' : 'Inactive' %>
+                                                                </span>
+                                                            </p>
+                                                            <p class="mb-3"><strong>Uploaded:</strong> <%= new Date(objectionDocsByType.guidelines.uploadedAt).toLocaleDateString() %></p>
+                                                            
+                                                            <div class="d-flex gap-2 flex-wrap">
+                                                                <button class="btn btn-sm <%= objectionDocsByType.guidelines.isActive ? 'btn-warning' : 'btn-success' %>"
+                                                                        onclick="toggleObjectionDoc('guidelines', <%= !objectionDocsByType.guidelines.isActive %>)">
+                                                                    <i class="fas <%= objectionDocsByType.guidelines.isActive ? 'fa-eye-slash' : 'fa-eye' %> me-1"></i>
+                                                                    <%= objectionDocsByType.guidelines.isActive ? 'Deactivate' : 'Activate' %>
+                                                                </button>
+                                                                <a href="<%= objectionDocsByType.guidelines.fileUrl %>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                    <i class="fas fa-eye me-1"></i>View
+                                                                </a>
+                                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteObjectionDoc('guidelines')">
+                                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                                </button>
+                                                            </div>
+                                                        <% } else { %>
+                                                            <p class="text-muted mb-3">No guidelines document uploaded</p>
+                                                            <button class="btn btn-sm btn-outline-primary" onclick="uploadObjectionDoc('guidelines')">
+                                                                <i class="fas fa-upload me-1"></i>Upload Guidelines
+                                                            </button>
+                                                        <% } %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card border-<%= objectionDocsByType.form ? (objectionDocsByType.form.isActive ? 'success' : 'warning') : 'secondary' %>">
+                                                    <div class="card-header bg-<%= objectionDocsByType.form ? (objectionDocsByType.form.isActive ? 'success' : 'warning') : 'secondary' %> text-white">
+                                                        <h6 class="mb-0">
+                                                            <i class="fas fa-file-alt me-2"></i>
+                                                            વાંધા અરજી ફોર્મ (Form)
+                                                        </h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <% if (objectionDocsByType.form) { %>
+                                                            <p class="mb-2"><strong>File:</strong> <%= objectionDocsByType.form.fileName %></p>
+                                                            <p class="mb-2"><strong>Status:</strong>
+                                                                <span class="badge <%= objectionDocsByType.form.isActive ? 'bg-success' : 'bg-warning' %>">
+                                                                    <%= objectionDocsByType.form.isActive ? 'Active' : 'Inactive' %>
+                                                                </span>
+                                                            </p>
+                                                            <p class="mb-3"><strong>Uploaded:</strong> <%= new Date(objectionDocsByType.form.uploadedAt).toLocaleDateString() %></p>
+                                                            
+                                                            <div class="d-flex gap-2 flex-wrap">
+                                                                <button class="btn btn-sm <%= objectionDocsByType.form.isActive ? 'btn-warning' : 'btn-success' %>"
+                                                                        onclick="toggleObjectionDoc('form', <%= !objectionDocsByType.form.isActive %>)">
+                                                                    <i class="fas <%= objectionDocsByType.form.isActive ? 'fa-eye-slash' : 'fa-eye' %> me-1"></i>
+                                                                    <%= objectionDocsByType.form.isActive ? 'Deactivate' : 'Activate' %>
+                                                                </button>
+                                                                <a href="<%= objectionDocsByType.form.fileUrl %>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                    <i class="fas fa-eye me-1"></i>View
+                                                                </a>
+                                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteObjectionDoc('form')">
+                                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                                </button>
+                                                            </div>
+                                                        <% } else { %>
+                                                            <p class="text-muted mb-3">No form document uploaded</p>
+                                                            <button class="btn btn-sm btn-outline-primary" onclick="uploadObjectionDoc('form')">
+                                                                <i class="fas fa-upload me-1"></i>Upload Form
+                                                            </button>
+                                                        <% } %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Upload New Objection Document -->
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Upload / Replace Objection Document</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="alert alert-info mb-3">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    <strong>Note:</strong> Only PDF files are allowed. Uploading a new document will replace the existing one.
+                                                </div>
+                                                <form id="objectionDocForm" action="/admin/objection-docs" method="POST" enctype="multipart/form-data">
+                                                    <div class="row align-items-end">
+                                                        <div class="col-md-3">
+                                                            <label for="documentType" class="form-label">Document Type</label>
+                                                            <select class="form-select" id="documentType" name="documentType" required>
+                                                                <option value="">Select Type</option>
+                                                                <option value="guidelines">Guidelines (માર્ગદર્શિકા)</option>
+                                                                <option value="form">Form (ફોર્મ)</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label for="objectionFile" class="form-label">PDF File</label>
+                                                            <input type="file" class="form-control" id="objectionFile" name="objectionFile" accept=".pdf" required>
+                                                            <div class="form-text">Only PDF files are supported</div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i class="fas fa-upload me-1"></i>Upload
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1885,6 +2016,8 @@
                 });
             });
         }
+
+
     </script>
 </body>
 

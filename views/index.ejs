@@ -32,6 +32,56 @@
             outline: none;
             box-shadow: 0 0 0 0.2rem rgba(52, 73, 94, 0.25);
         }
+
+        /* Notification Bar Styles */
+        .notification-bar {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 12px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .notification-container {
+            display: inline-block;
+            animation: scroll-left 25s linear infinite;
+        }
+
+        .notification-text {
+            display: inline-block;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 0 50px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Pause animation on hover */
+        .notification-bar:hover .notification-container {
+            animation-play-state: paused;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .notification-text {
+                font-size: 14px;
+                padding: 0 30px;
+            }
+            
+            .notification-bar {
+                padding: 10px 0;
+            }
+        }
     </style>
 </head>
 
@@ -63,6 +113,34 @@
             </div>
         </div>
     </nav>
+
+    <!-- Notification Bar - Uncomment the notification you want to show -->
+    <!-- <div class="notification-bar">
+        <div class="notification-container">
+            <!-- OMR Sheet Published Notifications -->
+            <!-- <div class="notification-text">📋 OMR Sheet published for Forest Guard Post - Download and verify your responses now!</div> -->
+            <!-- <div class="notification-text">📋 OMR Sheet published for Police Constable Post - Check your marked answers immediately!</div> -->
+            <!-- <div class="notification-text">📋 OMR Sheet published for Clerk Post - Verify your responses before objection deadline!</div> -->
+            
+            <!-- Answer Key Published Notifications -->
+            <!-- <div class="notification-text">🔑 Answer Key published for Forest Guard Exam - Compare with your responses now!</div> -->
+            <!-- <div class="notification-text">🔑 Answer Key published for Police Constable Exam - Check correct answers in Answer Key section!</div> -->
+            <!-- <div class="notification-text">🔑 Answer Key published for Clerk Exam - Download from Answer Key section immediately!</div> -->
+            
+            <!-- Result Declared Notifications -->
+            <!-- <div class="notification-text">🎉 Results declared for Forest Guard Post - Login with your details to check your scorecard!</div> -->
+            <!-- <div class="notification-text">🎉 Results declared for Police Constable Post - Check your final scores and ranking now!</div> -->
+            <!-- <div class="notification-text">🎉 Results declared for Clerk Post - View your detailed result and merit list!</div> -->
+            
+            <!-- Objection/Important Notifications -->
+            <!-- <div class="notification-text">⚠️ Last 3 days to submit objections for Forest Guard Answer Key - Submit before deadline!</div> -->
+            <!-- <div class="notification-text">📅 Objection period extended till 20th March for Police Constable Exam - Don't miss the deadline!</div> -->
+            <!-- <div class="notification-text">🔔 Document verification dates announced for selected candidates - Check your email!</div> -->
+            
+            <!-- Default Welcome Message - Currently Active -->
+            <!-- <div class="notification-text">🎯 Welcome to OMR Result Viewer - Login with your Roll Number and DOB/Mobile to check exam results instantly!</div>
+        </div>
+    </div> --> 
 
     <!-- Main Content -->
     <main class="container-fluid my-4">

@@ -10,6 +10,7 @@ const path = require('path');
 const Admin = require('../models/Admin');
 const Student = require('../models/Student');
 const AnswerKey = require('../models/AnswerKey');
+const ObjectionDocument = require('../models/ObjectionDocument');
 const Config = require('../models/Config');
 const { requireAuth, redirectIfAuth } = require('../middleware/auth');
 const { validateAdminLogin, validateStudent, handleValidationErrors } = require('../middleware/validate');
@@ -27,6 +28,8 @@ const storage = multer.diskStorage({
       uploadDir = 'uploads/omr/';
     } else if (file.fieldname === 'answerKeyFile') {
       uploadDir = 'uploads/answer-keys/';
+    } else if (file.fieldname === 'objectionFile') {
+      uploadDir = 'uploads/objection-docs/';
     } else if (file.fieldname === 'excelFile') {
       uploadDir = 'uploads/temp/';
     }
@@ -46,6 +49,8 @@ const storage = multer.diskStorage({
       cb(null, `omr_${rollNo}_${timestamp}${extension}`);
     } else if (file.fieldname === 'answerKeyFile') {
       cb(null, `answer_key_${timestamp}${extension}`);
+    } else if (file.fieldname === 'objectionFile') {
+      cb(null, `objection_${timestamp}${extension}`);
     } else {
       cb(null, `${timestamp}_${file.originalname}`);
     }
@@ -55,7 +60,7 @@ const storage = multer.diskStorage({
 const upload = multer({ 
   storage: storage,
   limits: {
-    fileSize: 50 * 1024 * 1024 // 50MB limit
+    fileSize: 250 * 1024 * 1024 // 250MB limit
   },
   fileFilter: (req, file, cb) => {
     if (file.fieldname === 'zipFile') {
@@ -76,6 +81,12 @@ const upload = multer({
         cb(null, true);
       } else {
         cb(new Error('Only image or PDF files are allowed for answer key'));
+      }
+    } else if (file.fieldname === 'objectionFile') {
+      if (file.mimetype === 'application/pdf') {
+        cb(null, true);
+      } else {
+        cb(new Error('Only PDF files are allowed for objection documents'));
       }
     } else {
       cb(null, true);
@@ -116,6 +127,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
   try {
     const students = await Student.find().sort({ createdAt: -1 });
     const answerKeys = await AnswerKey.find().sort({ uploadedAt: -1 });
+    const objectionDocs = await ObjectionDocument.find().sort({ uploadedAt: -1 });
     const omrPublicConfig = await Config.findOne({ key: 'omrPublic' });
     const resultsPublicConfig = await Config.findOne({ key: 'resultsPublic' });
     const isOmrPublic = omrPublicConfig ? omrPublicConfig.value : false;
@@ -130,6 +142,12 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     const posts = ['DCP', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'];
     posts.forEach(post => {
       answerKeysByPost[post] = answerKeys.find(ak => ak.postType === post) || null;
+    });
+    
+    // Group objection documents by type
+    const objectionDocsByType = {};
+    objectionDocs.forEach(doc => {
+      objectionDocsByType[doc.documentType] = doc;
     });
     
     // Calculate post-wise statistics
@@ -152,6 +170,8 @@ router.get('/dashboard', requireAuth, async (req, res) => {
       students,
       answerKeys,
       answerKeysByPost,
+      objectionDocs,
+      objectionDocsByType,
       posts,
       postStats,
       isOmrPublic,
@@ -167,6 +187,8 @@ router.get('/dashboard', requireAuth, async (req, res) => {
       students: [],
       answerKeys: [],
       answerKeysByPost: {},
+      objectionDocs: [],
+      objectionDocsByType: {},
       posts: ['DCP', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'],
       postStats: {},
       isOmrPublic: false,
@@ -952,6 +974,125 @@ router.post('/results/bulk', requireAuth, upload.single('excelFile'), async (req
     console.error('Bulk results upload error:', error);
     req.session.errors = [{ msg: 'Error processing results file' }];
     res.redirect('/admin/dashboard');
+  }
+});
+
+// Upload objection document
+router.post('/objection-docs', requireAuth, upload.single('objectionFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      req.session.errors = [{ msg: 'Please select a PDF file' }];
+      return res.redirect('/admin/dashboard');
+    }
+    
+    const { documentType } = req.body;
+    
+    if (!documentType || !['guidelines', 'form'].includes(documentType)) {
+      req.session.errors = [{ msg: 'Please select a valid document type' }];
+      return res.redirect('/admin/dashboard');
+    }
+    
+    // Keep the file in its uploaded location
+    const relativePath = req.file.path.replace(/\\/g, '/'); // Normalize path separators
+    const publicPath = `/${relativePath}`;
+    
+    // Check if document already exists for this type
+    const existingDoc = await ObjectionDocument.findOne({ documentType });
+    
+    if (existingDoc) {
+      // Delete old file
+      const oldFilePath = path.join(__dirname, '..', existingDoc.fileUrl.replace(/^\//, ''));
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath);
+      }
+      
+      // Update existing document
+      existingDoc.fileUrl = publicPath;
+      existingDoc.fileName = req.file.originalname;
+      existingDoc.uploadedAt = new Date();
+      await existingDoc.save();
+    } else {
+      // Create new document
+      const objectionDoc = new ObjectionDocument({
+        documentType,
+        fileUrl: publicPath,
+        fileName: req.file.originalname
+      });
+      await objectionDoc.save();
+    }
+    
+    const docTypeName = documentType === 'guidelines' ? 'Guidelines' : 'Form';
+    req.session.success = `Objection ${docTypeName} uploaded successfully`;
+    res.redirect('/admin/dashboard');
+  } catch (error) {
+    console.error('Objection document upload error:', error);
+    // Clean up file on error
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    req.session.errors = [{ msg: 'Error uploading objection document' }];
+    res.redirect('/admin/dashboard');
+  }
+});
+
+// Toggle objection document active status
+router.put('/objection-docs/toggle', requireAuth, async (req, res) => {
+  try {
+    const { isActive, documentType } = req.body;
+    
+    if (!documentType) {
+      return res.json({ success: false, message: 'Document type is required' });
+    }
+    
+    const objectionDoc = await ObjectionDocument.findOne({ documentType });
+    if (!objectionDoc) {
+      return res.json({ success: false, message: `No ${documentType} document found` });
+    }
+    
+    objectionDoc.isActive = isActive === true || isActive === 'true';
+    await objectionDoc.save();
+    
+    const action = (isActive === true || isActive === 'true') ? 'activated' : 'deactivated';
+    const docTypeName = documentType === 'guidelines' ? 'Guidelines' : 'Form';
+    res.json({ success: true, message: `Objection ${docTypeName} ${action} successfully` });
+  } catch (error) {
+    console.error('Toggle objection document error:', error);
+    res.json({ success: false, message: 'Error updating objection document status' });
+  }
+});
+
+// Delete objection document
+router.delete('/objection-docs/:documentType', requireAuth, async (req, res) => {
+  try {
+    const { documentType } = req.params;
+    
+    if (!['guidelines', 'form'].includes(documentType)) {
+      return res.json({ success: false, message: 'Invalid document type' });
+    }
+    
+    const objectionDoc = await ObjectionDocument.findOne({ documentType });
+    if (!objectionDoc) {
+      return res.json({ success: false, message: `No ${documentType} document found` });
+    }
+    
+    // Delete the file from filesystem
+    const filePath = path.join(__dirname, '..', objectionDoc.fileUrl.replace(/^\//, ''));
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (fileError) {
+        console.error('Error deleting file:', fileError);
+      }
+    }
+    
+    // Delete from database
+    await ObjectionDocument.deleteOne({ documentType });
+    
+    const docTypeName = documentType === 'guidelines' ? 'Guidelines' : 'Form';
+    res.json({ success: true, message: `Objection ${docTypeName} deleted successfully` });
+  } catch (error) {
+    console.error('Delete objection document error:', error);
+    res.json({ success: false, message: 'Error deleting objection document' });
   }
 });
 

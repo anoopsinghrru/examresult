@@ -125,6 +125,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve uploaded files statically (excluding sensitive OMR files)
 app.use('/uploads/answer-keys', express.static(path.join(__dirname, 'uploads/answer-keys')));
+app.use('/uploads/objection-docs', express.static(path.join(__dirname, 'uploads/objection-docs')));
 app.use('/uploads/temp', express.static(path.join(__dirname, 'uploads/temp')));
 
 // Session configuration

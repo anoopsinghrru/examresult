@@ -5,6 +5,7 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 const Student = require('../models/Student');
 const AnswerKey = require('../models/AnswerKey');
+const ObjectionDocument = require('../models/ObjectionDocument');
 const Config = require('../models/Config');
 const { validateStudentAuth, handleValidationErrors } = require('../middleware/validate');
 const { getScoreBreakdown } = require('../utils/scoreCalculator');
@@ -181,18 +182,21 @@ router.get('/answer-key', async (req, res) => {
   try {
     const { post } = req.query;
     
+    // Get objection documents
+    const objectionDocs = await ObjectionDocument.find({ isActive: true }).sort({ documentType: 1 });
+    
     if (post && ['DCP', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'].includes(post)) {
       // Get answer key for specific post
       const answerKey = await AnswerKey.findOne({ postType: post, isPublished: true });
-      res.render('answer-key', { answerKey, post, answerKeys: null });
+      res.render('answer-key', { answerKey, post, answerKeys: null, objectionDocs });
     } else {
       // Get all published answer keys
       const answerKeys = await AnswerKey.find({ isPublished: true }).sort({ postType: 1 });
-      res.render('answer-key', { answerKeys, answerKey: null, post: null });
+      res.render('answer-key', { answerKeys, answerKey: null, post: null, objectionDocs });
     }
   } catch (error) {
     console.error('Answer key fetch error:', error);
-    res.render('answer-key', { answerKey: null, answerKeys: null, post: null });
+    res.render('answer-key', { answerKey: null, answerKeys: null, post: null, objectionDocs: [] });
   }
 });
 

@@ -86,6 +86,47 @@
 
 
                             </div>
+                            
+                            <!-- Objection Documents Section -->
+                            <% if (objectionDocs && objectionDocs.length > 0) { %>
+                                <div class="mt-5">
+                                    <div class="text-center mb-4">
+                                        <h6>વાંધા અરજી (Objection Application)</h6>
+                                        <p class="text-muted small">
+                                            Answer key સામે વાંધો હોય તો નીચેના documents વાપરો
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="row justify-content-center">
+                                        <% objectionDocs.forEach(doc => { %>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card h-100" style="border-color: #34495e;">
+                                                    <div class="card-body text-center">
+                                                        <h6 class="card-title" style="color: #34495e;">
+                                                            <i class="fas <%= doc.documentType === 'guidelines' ? 'fa-book' : 'fa-file-alt' %> me-2"></i>
+                                                            <%= doc.documentType === 'guidelines' ? 'વાંધા અરજી માર્ગદર્શિકા' : 'વાંધા અરજી ફોર્મ' %>
+                                                        </h6>
+                                                        <p class="card-text text-muted small">
+                                                            <%= doc.documentType === 'guidelines' ? 'Guidelines for Objection' : 'Objection Application Form' %>
+                                                        </p>
+                                                        <div class="d-grid gap-2">
+                                                            <a href="<%= doc.fileUrl %>" target="_blank" class="btn btn-sm text-white" style="background-color: #34495e;">
+                                                                <i class="fas fa-eye me-1"></i>
+                                                                View PDF
+                                                            </a>
+                                                            <a href="<%= doc.fileUrl %>" download="<%= doc.fileName %>" class="btn btn-outline btn-sm" style="border-color: #34495e; color: #34495e;">
+                                                                <i class="fas fa-download me-1"></i>
+                                                                Download
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+                            
                         <% } else if (answerKey && answerKey.isPublished) { %>
                             <!-- Single Answer Key Display - Quick Access Only -->
                             <div class="text-center">
@@ -116,6 +157,47 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Objection Documents Section for Single Answer Key -->
+                            <% if (objectionDocs && objectionDocs.length > 0) { %>
+                                <div class="mt-5">
+                                    <div class="text-center mb-4">
+                                        <h6>વાંધા અરજી (Objection Application)</h6>
+                                        <p class="text-muted small">
+                                            Answer key સામે વાંધો હોય તો નીચેના documents વાપરો
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="row justify-content-center">
+                                        <% objectionDocs.forEach(doc => { %>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card h-100" style="border-color: #34495e;">
+                                                    <div class="card-body text-center">
+                                                        <h6 class="card-title" style="color: #34495e;">
+                                                            <i class="fas <%= doc.documentType === 'guidelines' ? 'fa-book' : 'fa-file-alt' %> me-2"></i>
+                                                            <%= doc.documentType === 'guidelines' ? 'વાંધા અરજી માર્ગદર્શિકા' : 'વાંધા અરજી ફોર્મ' %>
+                                                        </h6>
+                                                        <p class="card-text text-muted small">
+                                                            <%= doc.documentType === 'guidelines' ? 'Guidelines for Objection' : 'Objection Application Form' %>
+                                                        </p>
+                                                        <div class="d-grid gap-2">
+                                                            <a href="<%= doc.fileUrl %>" target="_blank" class="btn btn-sm text-white" style="background-color: #34495e;">
+                                                                <i class="fas fa-eye me-1"></i>
+                                                                View PDF
+                                                            </a>
+                                                            <a href="<%= doc.fileUrl %>" download="<%= doc.fileName %>" class="btn btn-outline btn-sm" style="border-color: #34495e; color: #34495e;">
+                                                                <i class="fas fa-download me-1"></i>
+                                                                Download
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+                            
                         <% } else { %>
                             <!-- Answer Key Not Available -->
                             <div class="text-center py-5">
