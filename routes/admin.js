@@ -596,7 +596,7 @@ router.post('/omr/bulk', requireAuth, upload.single('zipFile'), async (req, res)
           if (num >= 1 && num <= 300) {
             rollNo = 'DCP' + numberPart; // Replace DCO with DCP, keep the number part
           }
-        }
+        } 
         
         const fileExtension = path.parse(fileName).ext.toLowerCase();
         
