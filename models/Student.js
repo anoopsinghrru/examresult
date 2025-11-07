@@ -59,6 +59,11 @@ const studentSchema = new mongoose.Schema({
       type: Number
     }
   },
+  active: {
+    type: Boolean,
+    default: true,
+    index: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -67,5 +72,7 @@ const studentSchema = new mongoose.Schema({
 
 // Index for faster queries
 studentSchema.index({ rollNo: 1 });
+studentSchema.index({ active: 1 });
+studentSchema.index({ postApplied: 1, active: 1 });
 
 module.exports = mongoose.model('Student', studentSchema);

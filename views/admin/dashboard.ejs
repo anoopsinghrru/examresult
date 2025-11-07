@@ -178,18 +178,16 @@
                                                         <div class="mt-2">
                                                             <div class="row text-center">
                                                                 <div class="col-6">
-                                                                    <div class="text-info fw-bold">
-                                                                        <%= Math.round((studentsWithOMR /
-                                                                            students.length) * 100) %>%
+                                                                    <div class="text-success fw-bold">
+                                                                        <%= activeStudents.length %>
                                                                     </div>
-                                                                    <small class="text-muted">w/ OMR</small>
+                                                                    <small class="text-muted">Active</small>
                                                                 </div>
                                                                 <div class="col-6">
-                                                                    <div class="text-success fw-bold">
-                                                                        <%= Math.round((studentsWithResults /
-                                                                            students.length) * 100) %>%
+                                                                    <div class="text-secondary fw-bold">
+                                                                        <%= inactiveStudents.length %>
                                                                     </div>
-                                                                    <small class="text-muted">w/ Results</small>
+                                                                    <small class="text-muted">Inactive</small>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -351,6 +349,42 @@
                                             </div>
                                         </div>
 
+                                        <!-- Bulk Actions -->
+                                        <div class="row mb-3">
+                                            <div class="col-12">
+                                                <div class="card border-0 bg-light">
+                                                    <div class="card-body py-2">
+                                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                                            <span class="text-muted fw-medium">Bulk Actions:</span>
+                                                            <button class="btn btn-success btn-sm" onclick="bulkToggleStudentsActive(true)">
+                                                                <i class="fas fa-play me-1"></i>Activate All
+                                                            </button>
+                                                            <button class="btn btn-secondary btn-sm" onclick="bulkToggleStudentsActive(false)">
+                                                                <i class="fas fa-pause me-1"></i>Deactivate All
+                                                            </button>
+                                                            <div class="vr"></div>
+                                                            <select class="form-select form-select-sm" id="bulkPostFilter" style="width: auto;">
+                                                                <option value="all">All Posts</option>
+                                                                <option value="DCP">DCP</option>
+                                                                <option value="DCO">DCO</option>
+                                                                <option value="FCD">FCD</option>
+                                                                <option value="LFM">LFM</option>
+                                                                <option value="DFO">DFO</option>
+                                                                <option value="SFO">SFO</option>
+                                                                <option value="WLO">WLO</option>
+                                                            </select>
+                                                            <button class="btn btn-outline-success btn-sm" onclick="bulkToggleByPost(true)">
+                                                                <i class="fas fa-play me-1"></i>Activate Selected
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary btn-sm" onclick="bulkToggleByPost(false)">
+                                                                <i class="fas fa-pause me-1"></i>Deactivate Selected
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <!-- Students Table -->
                                         <div class="table-responsive">
                                             <table class="table table-striped">
@@ -361,6 +395,7 @@
                                                         <th>DOB</th>
                                                         <th>Mobile</th>
                                                         <th>Post Applied</th>
+                                                        <th>Status</th>
                                                         <th>OMR</th>
                                                         <th>Results</th>
                                                         <th>Actions</th>
@@ -383,6 +418,17 @@
                                                             </td>
                                                             <td>
                                                                 <%= student.postApplied %>
+                                                            </td>
+                                                            <td>
+                                                                <% if (student.active) { %>
+                                                                    <span class="badge bg-success">
+                                                                        <i class="fas fa-check-circle me-1"></i>Active
+                                                                    </span>
+                                                                <% } else { %>
+                                                                    <span class="badge bg-secondary">
+                                                                        <i class="fas fa-pause-circle me-1"></i>Inactive
+                                                                    </span>
+                                                                <% } %>
                                                             </td>
                                                             <td>
                                                                 <% if (student.omrImageUrl) { %>
@@ -471,6 +517,19 @@
                                                                         title="Edit Student">
                                                                         <i class="fas fa-edit"></i>
                                                                     </button>
+                                                                    <% if (student.active) { %>
+                                                                        <button class="btn btn-outline-warning btn-sm"
+                                                                            onclick="toggleStudentActive('<%= student.rollNo %>', false)"
+                                                                            title="Deactivate Student">
+                                                                            <i class="fas fa-pause"></i>
+                                                                        </button>
+                                                                    <% } else { %>
+                                                                        <button class="btn btn-outline-success btn-sm"
+                                                                            onclick="toggleStudentActive('<%= student.rollNo %>', true)"
+                                                                            title="Activate Student">
+                                                                            <i class="fas fa-play"></i>
+                                                                        </button>
+                                                                    <% } %>
                                                                     <button class="btn btn-outline-danger btn-sm"
                                                                         onclick="deleteStudent('<%= student.rollNo %>')"
                                                                         title="Delete Student">

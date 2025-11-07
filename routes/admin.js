@@ -134,6 +134,8 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     const isResultsPublic = resultsPublicConfig ? resultsPublicConfig.value : false;
     
     // Calculate statistics
+    const activeStudents = students.filter(s => s.active);
+    const inactiveStudents = students.filter(s => !s.active);
     const studentsWithOMR = students.filter(s => s.omrImageUrl && s.omrImageUrl.trim()).length;
     const studentsWithResults = students.filter(s => s.results && typeof s.results === 'object' && s.results.finalScore !== undefined).length;
     
@@ -168,6 +170,8 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     
     res.render('admin/dashboard', {
       students,
+      activeStudents,
+      inactiveStudents,
       answerKeys,
       answerKeysByPost,
       objectionDocs,
@@ -1103,6 +1107,64 @@ router.delete('/objection-docs/:documentType', requireAuth, async (req, res) => 
   } catch (error) {
     console.error('Delete objection document error:', error);
     res.json({ success: false, message: 'Error deleting objection document' });
+  }
+});
+
+// Bulk toggle students active status (must come before individual route)
+router.put('/students/bulk/active', requireAuth, async (req, res) => {
+  try {
+    const { isActive, filter } = req.body;
+    let query = {};
+    
+    // Apply filters
+    if (filter.postApplied && filter.postApplied !== 'all') {
+      query.postApplied = filter.postApplied;
+    }
+    
+    if (filter.dateRange && filter.dateRange.start && filter.dateRange.end) {
+      query.createdAt = {
+        $gte: new Date(filter.dateRange.start),
+        $lte: new Date(filter.dateRange.end)
+      };
+    }
+    
+    const result = await Student.updateMany(
+      query,
+      { active: isActive === true || isActive === 'true' }
+    );
+    
+    const status = (isActive === true || isActive === 'true') ? 'activated' : 'deactivated';
+    res.json({ 
+      success: true, 
+      message: `${result.modifiedCount} students ${status} successfully`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Bulk toggle students active error:', error);
+    res.json({ success: false, message: 'Error updating students status' });
+  }
+});
+
+// Toggle student active status
+router.put('/students/:rollNo/active', requireAuth, async (req, res) => {
+  try {
+    const { isActive } = req.body;
+    const rollNo = req.params.rollNo.toUpperCase();
+    
+    const result = await Student.updateOne(
+      { rollNo },
+      { active: isActive === true || isActive === 'true' }
+    );
+    
+    if (result.matchedCount > 0) {
+      const status = (isActive === true || isActive === 'true') ? 'activated' : 'deactivated';
+      res.json({ success: true, message: `Student ${rollNo} ${status} successfully` });
+    } else {
+      res.json({ success: false, message: 'Student not found' });
+    }
+  } catch (error) {
+    console.error('Toggle student active error:', error);
+    res.json({ success: false, message: 'Error updating student status' });
   }
 });
 

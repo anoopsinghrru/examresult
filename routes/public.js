@@ -43,8 +43,8 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
       }
     }
     
-    // Find student by roll number
-    const student = await Student.findOne({ rollNo: rollNo.toUpperCase() });
+    // Find student by roll number - only active students can authenticate
+    const student = await Student.findOne({ rollNo: rollNo.toUpperCase(), active: true });
     
     if (!student) {
       req.session.errors = [{ msg: 'Please check your details and try again.' }];
@@ -138,8 +138,8 @@ router.get('/secure/omr/:rollNo', omrRateLimit, async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized access' });
     }
     
-    // Find the student to get their OMR file path
-    const student = await Student.findOne({ rollNo: requestedRollNo });
+    // Find the student to get their OMR file path - check if student is active
+    const student = await Student.findOne({ rollNo: requestedRollNo, active: true });
     if (!student || !student.omrImageUrl) {
       return res.status(404).json({ error: 'OMR image not found' });
     }

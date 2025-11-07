@@ -374,9 +374,103 @@ function addResultsForStudent(rollNo) {
     bootstrapModal.show();
 }
 
-// Upload answer key for specific post
+// Toggle student active status
+function toggleStudentActive(rollNo, isActive) {
+    console.log('toggleStudentActive called with:', { rollNo, isActive });
+    
+    // Prevent double execution
+    if (window.toggleStudentActiveInProgress) return;
+    window.toggleStudentActiveInProgress = true;
+
+    const action = isActive ? 'activate' : 'deactivate';
+    if (confirm(`Are you sure you want to ${action} student ${rollNo}?`)) {
+        console.log('User confirmed individual toggle, making request...');
+        
+        fetch(`/admin/students/${rollNo}/active`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ isActive })
+        })
+            .then(response => {
+                console.log('Individual toggle response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Individual toggle response data:', data);
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Individual toggle error:', error);
+                alert('An error occurred while updating student status');
+            })
+            .finally(() => {
+                window.toggleStudentActiveInProgress = false;
+            });
+    } else {
+        console.log('User cancelled individual toggle');
+        window.toggleStudentActiveInProgress = false;
+    }
+}
+
+// Bulk toggle students active status
+function bulkToggleStudentsActive(isActive, filter = {}) {
+    console.log('bulkToggleStudentsActive called with:', { isActive, filter });
+    
+    const action = isActive ? 'activate' : 'deactivate';
+    const filterText = filter.postApplied && filter.postApplied !== 'all' ? ` for ${filter.postApplied}` : '';
+    
+    if (confirm(`Are you sure you want to ${action} all students${filterText}?`)) {
+        console.log('User confirmed, making request...');
+        
+        fetch('/admin/students/bulk/active', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ isActive, filter })
+        })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('An error occurred while updating students status');
+            });
+    } else {
+        console.log('User cancelled the action');
+    }
+}
+
+// Bulk toggle students by post type
+function bulkToggleByPost(isActive) {
+    const postFilter = document.getElementById('bulkPostFilter').value;
+    const filter = {};
+    
+    if (postFilter && postFilter !== 'all') {
+        filter.postApplied = postFilter;
+    }
+    
+    bulkToggleStudentsActive(isActive, filter);
+}
+
+// Upload answer key for specific post type
 function uploadAnswerKeyForPost(postType) {
-    // Set the post type in the form and switch to answer key tab
     const postTypeSelect = document.getElementById('postType');
     const answerKeyTab = document.getElementById('answer-key-tab');
     const answerKeyFile = document.getElementById('answerKeyFile');
