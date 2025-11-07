@@ -4,7 +4,7 @@ const answerKeySchema = new mongoose.Schema({
   postType: {
     type: String,
     required: true,
-    enum: ['DCP', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO']
+    enum: ['DCP', 'DCO', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO']
   },
   fileUrl: {
     type: String,

@@ -208,6 +208,8 @@ const validateStudent = [
     .withMessage('Post applied is required')
     .trim()
     .escape()
+    .isIn(['DCP', 'DCO', 'FCD', 'LFM', 'DFO', 'SFO', 'WLO'])
+    .withMessage('Please select a valid post type')
 ];
 
 // 🛡️ Enhanced middleware to handle validation errors with security logging
