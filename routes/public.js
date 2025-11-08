@@ -47,7 +47,7 @@ router.post('/view', validateStudentAuth, handleValidationErrors, async (req, re
     const student = await Student.findOne({ rollNo: rollNo.toUpperCase(), active: true });
     
     if (!student) {
-      req.session.errors = [{ msg: 'The window to review and download your omr is now closed' }];
+      req.session.errors = [{ msg: 'The window to review and download your OMR is now closed' }];
       return res.redirect('/');
     }
     
