@@ -47,7 +47,11 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>Roll Number:</strong> <%= student.rollNo %></p>
-                                <p><strong>Post Applied:</strong> <%= student.postApplied %></p>
+                                <p><strong>Post Applied:</strong> <%= student.postApplied === 'SFO' ? 'Fire Inspector' : 
+                                    student.postApplied === 'FCD' ? 'Fireman' : 
+                                    student.postApplied === 'DCO' ? 'Driver' : 
+                                    student.postApplied === 'WLO' ? 'Clerk' : 
+                                    student.postApplied %></p>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Date of Birth:</strong> <%= new Date(student.dob).toLocaleDateString('en-GB') %></p>
@@ -193,7 +197,11 @@
                 </a>
                 <a href="/answer-key?post=<%= student.postApplied %>" class="btn me-2" style="border: 1px solid #28a745; color: #28a745;">
                     <i class="fas fa-key me-1"></i>
-                    View Answer Key (<%= student.postApplied %>)
+                    View Answer Key (<%= student.postApplied === 'SFO' ? 'Fire Inspector' : 
+                        student.postApplied === 'FCD' ? 'Fireman' : 
+                        student.postApplied === 'DCO' ? 'Driver' : 
+                        student.postApplied === 'WLO' ? 'Clerk' : 
+                        student.postApplied %>)
                 </a>
                 <button onclick="window.print()" class="btn" style="border: 1px solid #6c757d; color: #6c757d;">
                     <i class="fas fa-print me-1"></i>

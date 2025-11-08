@@ -62,7 +62,11 @@
                                                 <div class="card-body text-center">
                                                     <h6 class="card-title" style="color: #34495e;">
                                                         <i class="fas fa-key me-2"></i>
-                                                        <%= ak.postType %>
+                                                        <%= ak.postType === 'SFO' ? 'Fire Inspector' : 
+                                                            ak.postType === 'FCD' ? 'Fireman' : 
+                                                            ak.postType === 'DCO' ? 'Driver' : 
+                                                            ak.postType === 'WLO' ? 'Clerk' : 
+                                                            ak.postType %>
                                                     </h6>
                                                     <p class="card-text text-muted small">
                                                         Published: <%= new Date(ak.uploadedAt).toLocaleDateString() %>
@@ -137,7 +141,11 @@
                                             <div class="card-body text-center">
                                                 <h6 class="card-title" style="color: #34495e;">
                                                     <i class="fas fa-key me-2"></i>
-                                                    <%= post %> Answer Key
+                                                    <%= post === 'SFO' ? 'Fire Inspector' : 
+                                                        post === 'FCD' ? 'Fireman' : 
+                                                        post === 'DCO' ? 'Driver' : 
+                                                        post === 'WLO' ? 'Clerk' : 
+                                                        post %> Answer Key
                                                 </h6>
                                                 <p class="card-text text-muted small">
                                                     Published: <%= new Date(answerKey.uploadedAt).toLocaleDateString() %>
