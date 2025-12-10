@@ -21,7 +21,7 @@ const studentSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return /^\d{10}$/.test(v);
       },
       message: 'Mobile number must be exactly 10 digits'
@@ -49,11 +49,11 @@ const studentSchema = new mongoose.Schema({
     },
     finalScore: {
       type: Number,
-      required: function() { return this.results && (this.results.correctAnswers !== undefined || this.results.wrongAnswers !== undefined); }
+      required: function () { return this.results && (this.results.correctAnswers !== undefined || this.results.wrongAnswers !== undefined); }
     },
     totalQuestions: {
       type: Number,
-      default: 50
+      default: 100
     },
     percentage: {
       type: Number

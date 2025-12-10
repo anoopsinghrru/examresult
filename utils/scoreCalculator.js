@@ -2,6 +2,12 @@
  * Score Calculator Utility
  * Handles result processing for the exam system
  * 
+ * Scoring System:
+ * - Total Questions: 100
+ * - Correct Answer: +2 marks
+ * - Wrong Answer: -0.5 marks
+ * - Maximum Score: 200 marks
+ * 
  * Note: All calculations (final score, percentage) are now provided directly
  * from Excel uploads. This utility only validates and formats the data.
  */
@@ -25,15 +31,15 @@ function createResults(correctCount, wrongCount, unattemptedCount, finalScore, p
     throw new Error('Final score is required');
   }
 
-  const totalQuestions = 50;
+  const totalQuestions = 100;
   const totalAnswered = correctCount + wrongCount + unattemptedCount;
 
   if (totalAnswered !== totalQuestions) {
     throw new Error(`Total answers (${totalAnswered}) must equal ${totalQuestions}`);
   }
 
-  // If percentage not provided, calculate it based on finalScore out of 100
-  const calculatedPercentage = percentage !== null ? percentage : Math.max(0, (finalScore / 100) * 100);
+  // If percentage not provided, calculate it based on finalScore out of 200 (max possible score)
+  const calculatedPercentage = percentage !== null ? percentage : Math.max(0, (finalScore / 200) * 100);
 
   return {
     correctAnswers: correctCount,
@@ -55,7 +61,7 @@ function createResults(correctCount, wrongCount, unattemptedCount, finalScore, p
  */
 function validateResultData(correct, wrong, unattempted, finalScore) {
   const total = correct + wrong + unattempted;
-  return total === 50 && correct >= 0 && wrong >= 0 && unattempted >= 0 && finalScore !== undefined && finalScore !== null;
+  return total === 100 && correct >= 0 && wrong >= 0 && unattempted >= 0 && finalScore !== undefined && finalScore !== null;
 }
 
 /**
@@ -80,7 +86,7 @@ function getScoreBreakdown(results) {
     final: {
       score: results.finalScore,
       percentage: results.percentage,
-      outOf: 100
+      outOf: 200
     }
   };
 }

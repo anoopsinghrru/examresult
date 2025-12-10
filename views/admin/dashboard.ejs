@@ -331,18 +331,25 @@
                                                             Students (Excel)</label>
                                                         <input type="file" class="form-control" id="studentExcel"
                                                             name="excelFile" accept=".xlsx,.xls" required>
-                                                        <div class="form-text">Excel: rollNo, name, dob (DD-MM-YYYY or DD/MM/YYYY),
+                                                        <div class="form-text">Excel: rollNo, name, dob (DD-MM-YYYY or
+                                                            DD/MM/YYYY),
                                                             mobile, postApplied</div>
                                                         <!-- Progress indicator -->
-                                                        <div id="bulkStudentProgress" class="mt-2" style="display: none;">
+                                                        <div id="bulkStudentProgress" class="mt-2"
+                                                            style="display: none;">
                                                             <div class="progress mb-2">
-                                                                <div id="bulkStudentProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                                                                     role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                <div id="bulkStudentProgressBar"
+                                                                    class="progress-bar progress-bar-striped progress-bar-animated"
+                                                                    role="progressbar" style="width: 0%"
+                                                                    aria-valuenow="0" aria-valuemin="0"
+                                                                    aria-valuemax="100"></div>
                                                             </div>
-                                                            <small id="bulkStudentProgressText" class="text-muted"></small>
+                                                            <small id="bulkStudentProgressText"
+                                                                class="text-muted"></small>
                                                         </div>
                                                     </div>
-                                                    <button type="submit" class="btn btn-success" data-original-text="<i class='fas fa-upload me-1'></i>Upload">
+                                                    <button type="submit" class="btn btn-success"
+                                                        data-original-text="<i class='fas fa-upload me-1'></i>Upload">
                                                         <i class="fas fa-upload me-1"></i>Upload
                                                     </button>
                                                 </form>
@@ -356,14 +363,17 @@
                                                     <div class="card-body py-2">
                                                         <div class="d-flex flex-wrap align-items-center gap-2">
                                                             <span class="text-muted fw-medium">Bulk Actions:</span>
-                                                            <button class="btn btn-success btn-sm" onclick="bulkToggleStudentsActive(true)">
+                                                            <button class="btn btn-success btn-sm"
+                                                                onclick="bulkToggleStudentsActive(true)">
                                                                 <i class="fas fa-play me-1"></i>Activate All
                                                             </button>
-                                                            <button class="btn btn-secondary btn-sm" onclick="bulkToggleStudentsActive(false)">
+                                                            <button class="btn btn-secondary btn-sm"
+                                                                onclick="bulkToggleStudentsActive(false)">
                                                                 <i class="fas fa-pause me-1"></i>Deactivate All
                                                             </button>
                                                             <div class="vr"></div>
-                                                            <select class="form-select form-select-sm" id="bulkPostFilter" style="width: auto;">
+                                                            <select class="form-select form-select-sm"
+                                                                id="bulkPostFilter" style="width: auto;">
                                                                 <option value="all">All Posts</option>
                                                                 <option value="DCP">DCP</option>
                                                                 <option value="DCO">DCO</option>
@@ -373,10 +383,12 @@
                                                                 <option value="SFO">SFO</option>
                                                                 <option value="WLO">WLO</option>
                                                             </select>
-                                                            <button class="btn btn-outline-success btn-sm" onclick="bulkToggleByPost(true)">
+                                                            <button class="btn btn-outline-success btn-sm"
+                                                                onclick="bulkToggleByPost(true)">
                                                                 <i class="fas fa-play me-1"></i>Activate Selected
                                                             </button>
-                                                            <button class="btn btn-outline-secondary btn-sm" onclick="bulkToggleByPost(false)">
+                                                            <button class="btn btn-outline-secondary btn-sm"
+                                                                onclick="bulkToggleByPost(false)">
                                                                 <i class="fas fa-pause me-1"></i>Deactivate Selected
                                                             </button>
                                                         </div>
@@ -424,11 +436,12 @@
                                                                     <span class="badge bg-success">
                                                                         <i class="fas fa-check-circle me-1"></i>Active
                                                                     </span>
-                                                                <% } else { %>
-                                                                    <span class="badge bg-secondary">
-                                                                        <i class="fas fa-pause-circle me-1"></i>Inactive
-                                                                    </span>
-                                                                <% } %>
+                                                                    <% } else { %>
+                                                                        <span class="badge bg-secondary">
+                                                                            <i
+                                                                                class="fas fa-pause-circle me-1"></i>Inactive
+                                                                        </span>
+                                                                        <% } %>
                                                             </td>
                                                             <td>
                                                                 <% if (student.omrImageUrl) { %>
@@ -523,18 +536,20 @@
                                                                             title="Deactivate Student">
                                                                             <i class="fas fa-pause"></i>
                                                                         </button>
-                                                                    <% } else { %>
-                                                                        <button class="btn btn-outline-success btn-sm"
-                                                                            onclick="toggleStudentActive('<%= student.rollNo %>', true)"
-                                                                            title="Activate Student">
-                                                                            <i class="fas fa-play"></i>
-                                                                        </button>
-                                                                    <% } %>
-                                                                    <button class="btn btn-outline-danger btn-sm"
-                                                                        onclick="deleteStudent('<%= student.rollNo %>')"
-                                                                        title="Delete Student">
-                                                                        <i class="fas fa-trash"></i>
-                                                                    </button>
+                                                                        <% } else { %>
+                                                                            <button
+                                                                                class="btn btn-outline-success btn-sm"
+                                                                                onclick="toggleStudentActive('<%= student.rollNo %>', true)"
+                                                                                title="Activate Student">
+                                                                                <i class="fas fa-play"></i>
+                                                                            </button>
+                                                                            <% } %>
+                                                                                <button
+                                                                                    class="btn btn-outline-danger btn-sm"
+                                                                                    onclick="deleteStudent('<%= student.rollNo %>')"
+                                                                                    title="Delete Student">
+                                                                                    <i class="fas fa-trash"></i>
+                                                                                </button>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -565,7 +580,8 @@
                                         </div>
 
                                         <!-- Bulk OMR Upload -->
-                                        <form id="bulkOMRForm" action="/admin/omr/bulk" method="POST" enctype="multipart/form-data">
+                                        <form id="bulkOMRForm" action="/admin/omr/bulk" method="POST"
+                                            enctype="multipart/form-data">
                                             <div class="row align-items-end">
                                                 <div class="col-md-8">
                                                     <label for="omrZip" class="form-label">Upload OMR Sheets
@@ -577,14 +593,17 @@
                                                     <!-- Progress indicator -->
                                                     <div id="bulkOMRProgress" class="mt-2" style="display: none;">
                                                         <div class="progress mb-2">
-                                                            <div id="bulkOMRProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
-                                                                 role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                            <div id="bulkOMRProgressBar"
+                                                                class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                                                role="progressbar" style="width: 0%" aria-valuenow="0"
+                                                                aria-valuemin="0" aria-valuemax="100"></div>
                                                         </div>
                                                         <small id="bulkOMRProgressText" class="text-muted"></small>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
-                                                    <button type="submit" class="btn btn-primary" data-original-text="<i class='fas fa-upload me-1'></i>Upload OMR Sheets">
+                                                    <button type="submit" class="btn btn-primary"
+                                                        data-original-text="<i class='fas fa-upload me-1'></i>Upload OMR Sheets">
                                                         <i class="fas fa-upload me-1"></i>Upload OMR Sheets
                                                     </button>
                                                 </div>
@@ -621,7 +640,8 @@
                                                     <input type="file" class="form-control" id="resultsExcel"
                                                         name="excelFile" accept=".xlsx,.xls" required>
                                                     <div class="form-text">Excel should have columns: rollNo,
-                                                        correctAnswers, wrongAnswers, unattempted, finalScore, percentage (optional)</div>
+                                                        correctAnswers, wrongAnswers, unattempted, finalScore,
+                                                        percentage (optional)</div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <button type="submit" class="btn btn-success">
@@ -780,17 +800,23 @@
                                                                 name="answerKeyFile" accept=".pdf,image/*" required>
                                                             <div class="form-text">Supported: PDF, JPG, PNG</div>
                                                             <!-- Progress indicator -->
-                                                            <div id="answerKeyProgress" class="mt-2" style="display: none;">
+                                                            <div id="answerKeyProgress" class="mt-2"
+                                                                style="display: none;">
                                                                 <div class="progress mb-2">
-                                                                    <div id="answerKeyProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
-                                                                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                    <div id="answerKeyProgressBar"
+                                                                        class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                                                        role="progressbar" style="width: 0%"
+                                                                        aria-valuenow="0" aria-valuemin="0"
+                                                                        aria-valuemax="100"></div>
                                                                 </div>
-                                                                <small id="answerKeyProgressText" class="text-muted"></small>
+                                                                <small id="answerKeyProgressText"
+                                                                    class="text-muted"></small>
                                                             </div>
                                                         </div>
 
                                                         <div class="col-md-2">
-                                                            <button type="submit" class="btn btn-primary" data-original-text="<i class='fas fa-upload me-1'></i>Upload">
+                                                            <button type="submit" class="btn btn-primary"
+                                                                data-original-text="<i class='fas fa-upload me-1'></i>Upload">
                                                                 <i class="fas fa-upload me-1"></i>Upload
                                                             </button>
                                                         </div>
@@ -813,8 +839,10 @@
                                         <!-- Current Documents Status -->
                                         <div class="row mb-4">
                                             <div class="col-md-6 mb-3">
-                                                <div class="card border-<%= objectionDocsByType.guidelines ? (objectionDocsByType.guidelines.isActive ? 'success' : 'warning') : 'secondary' %>">
-                                                    <div class="card-header bg-<%= objectionDocsByType.guidelines ? (objectionDocsByType.guidelines.isActive ? 'success' : 'warning') : 'secondary' %> text-white">
+                                                <div
+                                                    class="card border-<%= objectionDocsByType.guidelines ? (objectionDocsByType.guidelines.isActive ? 'success' : 'warning') : 'secondary' %>">
+                                                    <div
+                                                        class="card-header bg-<%= objectionDocsByType.guidelines ? (objectionDocsByType.guidelines.isActive ? 'success' : 'warning') : 'secondary' %> text-white">
                                                         <h6 class="mb-0">
                                                             <i class="fas fa-book me-2"></i>
                                                             વાંધા અરજી માર્ગદર્શિકા (Guidelines)
@@ -822,40 +850,58 @@
                                                     </div>
                                                     <div class="card-body">
                                                         <% if (objectionDocsByType.guidelines) { %>
-                                                            <p class="mb-2"><strong>File:</strong> <%= objectionDocsByType.guidelines.fileName %></p>
+                                                            <p class="mb-2"><strong>File:</strong>
+                                                                <%= objectionDocsByType.guidelines.fileName %>
+                                                            </p>
                                                             <p class="mb-2"><strong>Status:</strong>
-                                                                <span class="badge <%= objectionDocsByType.guidelines.isActive ? 'bg-success' : 'bg-warning' %>">
-                                                                    <%= objectionDocsByType.guidelines.isActive ? 'Active' : 'Inactive' %>
+                                                                <span
+                                                                    class="badge <%= objectionDocsByType.guidelines.isActive ? 'bg-success' : 'bg-warning' %>">
+                                                                    <%= objectionDocsByType.guidelines.isActive
+                                                                        ? 'Active' : 'Inactive' %>
                                                                 </span>
                                                             </p>
-                                                            <p class="mb-3"><strong>Uploaded:</strong> <%= new Date(objectionDocsByType.guidelines.uploadedAt).toLocaleDateString() %></p>
-                                                            
+                                                            <p class="mb-3"><strong>Uploaded:</strong>
+                                                                <%= new
+                                                                    Date(objectionDocsByType.guidelines.uploadedAt).toLocaleDateString()
+                                                                    %>
+                                                            </p>
+
                                                             <div class="d-flex gap-2 flex-wrap">
-                                                                <button class="btn btn-sm <%= objectionDocsByType.guidelines.isActive ? 'btn-warning' : 'btn-success' %>"
-                                                                        onclick="toggleObjectionDoc('guidelines', <%= !objectionDocsByType.guidelines.isActive %>)">
-                                                                    <i class="fas <%= objectionDocsByType.guidelines.isActive ? 'fa-eye-slash' : 'fa-eye' %> me-1"></i>
-                                                                    <%= objectionDocsByType.guidelines.isActive ? 'Deactivate' : 'Activate' %>
+                                                                <button
+                                                                    class="btn btn-sm <%= objectionDocsByType.guidelines.isActive ? 'btn-warning' : 'btn-success' %>"
+                                                                    onclick="toggleObjectionDoc('guidelines', <%= !objectionDocsByType.guidelines.isActive %>)">
+                                                                    <i
+                                                                        class="fas <%= objectionDocsByType.guidelines.isActive ? 'fa-eye-slash' : 'fa-eye' %> me-1"></i>
+                                                                    <%= objectionDocsByType.guidelines.isActive
+                                                                        ? 'Deactivate' : 'Activate' %>
                                                                 </button>
-                                                                <a href="<%= objectionDocsByType.guidelines.fileUrl %>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                <a href="<%= objectionDocsByType.guidelines.fileUrl %>"
+                                                                    target="_blank"
+                                                                    class="btn btn-sm btn-outline-primary">
                                                                     <i class="fas fa-eye me-1"></i>View
                                                                 </a>
-                                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteObjectionDoc('guidelines')">
+                                                                <button class="btn btn-sm btn-outline-danger"
+                                                                    onclick="deleteObjectionDoc('guidelines')">
                                                                     <i class="fas fa-trash me-1"></i>Delete
                                                                 </button>
                                                             </div>
-                                                        <% } else { %>
-                                                            <p class="text-muted mb-3">No guidelines document uploaded</p>
-                                                            <button class="btn btn-sm btn-outline-primary" onclick="uploadObjectionDoc('guidelines')">
-                                                                <i class="fas fa-upload me-1"></i>Upload Guidelines
-                                                            </button>
-                                                        <% } %>
+                                                            <% } else { %>
+                                                                <p class="text-muted mb-3">No guidelines document
+                                                                    uploaded</p>
+                                                                <button class="btn btn-sm btn-outline-primary"
+                                                                    onclick="uploadObjectionDoc('guidelines')">
+                                                                    <i class="fas fa-upload me-1"></i>Upload Guidelines
+                                                                </button>
+                                                                <% } %>
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="col-md-6 mb-3">
-                                                <div class="card border-<%= objectionDocsByType.form ? (objectionDocsByType.form.isActive ? 'success' : 'warning') : 'secondary' %>">
-                                                    <div class="card-header bg-<%= objectionDocsByType.form ? (objectionDocsByType.form.isActive ? 'success' : 'warning') : 'secondary' %> text-white">
+                                                <div
+                                                    class="card border-<%= objectionDocsByType.form ? (objectionDocsByType.form.isActive ? 'success' : 'warning') : 'secondary' %>">
+                                                    <div
+                                                        class="card-header bg-<%= objectionDocsByType.form ? (objectionDocsByType.form.isActive ? 'success' : 'warning') : 'secondary' %> text-white">
                                                         <h6 class="mb-0">
                                                             <i class="fas fa-file-alt me-2"></i>
                                                             વાંધા અરજી ફોર્મ (Form)
@@ -863,33 +909,48 @@
                                                     </div>
                                                     <div class="card-body">
                                                         <% if (objectionDocsByType.form) { %>
-                                                            <p class="mb-2"><strong>File:</strong> <%= objectionDocsByType.form.fileName %></p>
+                                                            <p class="mb-2"><strong>File:</strong>
+                                                                <%= objectionDocsByType.form.fileName %>
+                                                            </p>
                                                             <p class="mb-2"><strong>Status:</strong>
-                                                                <span class="badge <%= objectionDocsByType.form.isActive ? 'bg-success' : 'bg-warning' %>">
-                                                                    <%= objectionDocsByType.form.isActive ? 'Active' : 'Inactive' %>
+                                                                <span
+                                                                    class="badge <%= objectionDocsByType.form.isActive ? 'bg-success' : 'bg-warning' %>">
+                                                                    <%= objectionDocsByType.form.isActive ? 'Active'
+                                                                        : 'Inactive' %>
                                                                 </span>
                                                             </p>
-                                                            <p class="mb-3"><strong>Uploaded:</strong> <%= new Date(objectionDocsByType.form.uploadedAt).toLocaleDateString() %></p>
-                                                            
+                                                            <p class="mb-3"><strong>Uploaded:</strong>
+                                                                <%= new
+                                                                    Date(objectionDocsByType.form.uploadedAt).toLocaleDateString()
+                                                                    %>
+                                                            </p>
+
                                                             <div class="d-flex gap-2 flex-wrap">
-                                                                <button class="btn btn-sm <%= objectionDocsByType.form.isActive ? 'btn-warning' : 'btn-success' %>"
-                                                                        onclick="toggleObjectionDoc('form', <%= !objectionDocsByType.form.isActive %>)">
-                                                                    <i class="fas <%= objectionDocsByType.form.isActive ? 'fa-eye-slash' : 'fa-eye' %> me-1"></i>
-                                                                    <%= objectionDocsByType.form.isActive ? 'Deactivate' : 'Activate' %>
+                                                                <button
+                                                                    class="btn btn-sm <%= objectionDocsByType.form.isActive ? 'btn-warning' : 'btn-success' %>"
+                                                                    onclick="toggleObjectionDoc('form', <%= !objectionDocsByType.form.isActive %>)">
+                                                                    <i
+                                                                        class="fas <%= objectionDocsByType.form.isActive ? 'fa-eye-slash' : 'fa-eye' %> me-1"></i>
+                                                                    <%= objectionDocsByType.form.isActive ? 'Deactivate'
+                                                                        : 'Activate' %>
                                                                 </button>
-                                                                <a href="<%= objectionDocsByType.form.fileUrl %>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                <a href="<%= objectionDocsByType.form.fileUrl %>"
+                                                                    target="_blank"
+                                                                    class="btn btn-sm btn-outline-primary">
                                                                     <i class="fas fa-eye me-1"></i>View
                                                                 </a>
-                                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteObjectionDoc('form')">
+                                                                <button class="btn btn-sm btn-outline-danger"
+                                                                    onclick="deleteObjectionDoc('form')">
                                                                     <i class="fas fa-trash me-1"></i>Delete
                                                                 </button>
                                                             </div>
-                                                        <% } else { %>
-                                                            <p class="text-muted mb-3">No form document uploaded</p>
-                                                            <button class="btn btn-sm btn-outline-primary" onclick="uploadObjectionDoc('form')">
-                                                                <i class="fas fa-upload me-1"></i>Upload Form
-                                                            </button>
-                                                        <% } %>
+                                                            <% } else { %>
+                                                                <p class="text-muted mb-3">No form document uploaded</p>
+                                                                <button class="btn btn-sm btn-outline-primary"
+                                                                    onclick="uploadObjectionDoc('form')">
+                                                                    <i class="fas fa-upload me-1"></i>Upload Form
+                                                                </button>
+                                                                <% } %>
                                                     </div>
                                                 </div>
                                             </div>
@@ -903,21 +964,28 @@
                                             <div class="card-body">
                                                 <div class="alert alert-info mb-3">
                                                     <i class="fas fa-info-circle me-2"></i>
-                                                    <strong>Note:</strong> Only PDF files are allowed. Uploading a new document will replace the existing one.
+                                                    <strong>Note:</strong> Only PDF files are allowed. Uploading a new
+                                                    document will replace the existing one.
                                                 </div>
-                                                <form id="objectionDocForm" action="/admin/objection-docs" method="POST" enctype="multipart/form-data">
+                                                <form id="objectionDocForm" action="/admin/objection-docs" method="POST"
+                                                    enctype="multipart/form-data">
                                                     <div class="row align-items-end">
                                                         <div class="col-md-3">
-                                                            <label for="documentType" class="form-label">Document Type</label>
-                                                            <select class="form-select" id="documentType" name="documentType" required>
+                                                            <label for="documentType" class="form-label">Document
+                                                                Type</label>
+                                                            <select class="form-select" id="documentType"
+                                                                name="documentType" required>
                                                                 <option value="">Select Type</option>
-                                                                <option value="guidelines">Guidelines (માર્ગદર્શિકા)</option>
+                                                                <option value="guidelines">Guidelines (માર્ગદર્શિકા)
+                                                                </option>
                                                                 <option value="form">Form (ફોર્મ)</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-md-4">
-                                                            <label for="objectionFile" class="form-label">PDF File</label>
-                                                            <input type="file" class="form-control" id="objectionFile" name="objectionFile" accept=".pdf" required>
+                                                            <label for="objectionFile" class="form-label">PDF
+                                                                File</label>
+                                                            <input type="file" class="form-control" id="objectionFile"
+                                                                name="objectionFile" accept=".pdf" required>
                                                             <div class="form-text">Only PDF files are supported</div>
                                                         </div>
                                                         <div class="col-md-2">
@@ -1059,8 +1127,10 @@
                                             <!-- Progress indicator -->
                                             <div id="omrUploadProgress" class="mb-3" style="display: none;">
                                                 <div class="progress mb-2">
-                                                    <div id="omrProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
-                                                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    <div id="omrProgressBar"
+                                                        class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                                        role="progressbar" style="width: 0%" aria-valuenow="0"
+                                                        aria-valuemin="0" aria-valuemax="100"></div>
                                                 </div>
                                                 <small id="omrProgressText" class="text-muted"></small>
                                             </div>
@@ -1091,8 +1161,10 @@
 
                                             <div class="alert alert-info">
                                                 <i class="fas fa-info-circle me-2"></i>
-                                                <strong>50 Questions Total:</strong> Enter the count of correct, wrong,
-                                                and unattempted answers along with the final score and percentage.
+                                                <strong>100 Questions Total:</strong> Enter the count of correct, wrong,
+                                                and unattempted answers along with the final score and percentage.<br>
+                                                <small><strong>Scoring:</strong> Correct: +2 marks | Wrong: -0.5 marks |
+                                                    Max Score: 200</small>
                                             </div>
 
                                             <div class="row">
@@ -1104,7 +1176,7 @@
                                                         </label>
                                                         <input type="number" class="form-control"
                                                             id="resultsCorrectAnswers" name="correctAnswers" min="0"
-                                                            max="50" required>
+                                                            max="100" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -1114,7 +1186,7 @@
                                                         </label>
                                                         <input type="number" class="form-control"
                                                             id="resultsWrongAnswers" name="wrongAnswers" min="0"
-                                                            max="50" required>
+                                                            max="100" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -1123,7 +1195,7 @@
                                                             <i class="fas fa-minus text-warning me-1"></i>Unattempted
                                                         </label>
                                                         <input type="number" class="form-control"
-                                                            id="resultsUnattempted" name="unattempted" min="0" max="50"
+                                                            id="resultsUnattempted" name="unattempted" min="0" max="100"
                                                             required>
                                                     </div>
                                                 </div>
@@ -1135,9 +1207,9 @@
                                                         <label for="resultsFinalScore" class="form-label">
                                                             <i class="fas fa-trophy text-primary me-1"></i>Final Score
                                                         </label>
-                                                        <input type="number" class="form-control"
-                                                            id="resultsFinalScore" name="finalScore" step="0.01" required>
-                                                        <div class="form-text">Total marks obtained</div>
+                                                        <input type="number" class="form-control" id="resultsFinalScore"
+                                                            name="finalScore" step="0.01" required>
+                                                        <div class="form-text">Total marks obtained (out of 200)</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -1145,9 +1217,10 @@
                                                         <label for="resultsPercentage" class="form-label">
                                                             <i class="fas fa-percent text-info me-1"></i>Percentage
                                                         </label>
-                                                        <input type="number" class="form-control"
-                                                            id="resultsPercentage" name="percentage" step="0.01" min="0" max="100">
-                                                        <div class="form-text">Optional - will be calculated if not provided</div>
+                                                        <input type="number" class="form-control" id="resultsPercentage"
+                                                            name="percentage" step="0.01" min="0" max="100">
+                                                        <div class="form-text">Optional - will be calculated if not
+                                                            provided</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1778,14 +1851,14 @@
 
                         html += `<div class="col-md-3"><div class="card border-danger"><div class="card-body">`;
                         html += `<h5 class="text-danger">${data.results.wrongAnswers}</h5>`;
-                        html += `<small>Wrong (-${(data.results.wrongAnswers * 0.25).toFixed(2)} marks)</small></div></div></div>`;
+                        html += `<small>Wrong (-${(data.results.wrongAnswers * 0.5).toFixed(2)} marks)</small></div></div></div>`;
 
                         html += `<div class="col-md-3"><div class="card border-warning"><div class="card-body">`;
                         html += `<h5 class="text-warning">${data.results.unattempted}</h5>`;
                         html += `<small>Unattempted (0 marks)</small></div></div></div>`;
 
                         html += `<div class="col-md-3"><div class="card border-primary"><div class="card-body">`;
-                        html += `<h5 class="text-primary">${data.results.finalScore}/100</h5>`;
+                        html += `<h5 class="text-primary">${data.results.finalScore}/200</h5>`;
                         html += `<small>Final Score (${data.results.percentage}%)</small></div></div></div>`;
                         html += '</div>';
 
@@ -1993,9 +2066,9 @@
                 const finalScore = parseFloat(formData.get('finalScore'));
                 const percentage = formData.get('percentage') ? parseFloat(formData.get('percentage')) : null;
 
-                // Validate total equals 50
-                if (correctAnswers + wrongAnswers + unattempted !== 50) {
-                    showAlert('danger', 'Total answers must equal 50 questions');
+                // Validate total equals 100
+                if (correctAnswers + wrongAnswers + unattempted !== 100) {
+                    showAlert('danger', 'Total answers must equal 100 questions');
                     return;
                 }
 
